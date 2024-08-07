@@ -1,20 +1,20 @@
 .secondSection .box {
-    width: 60rem;
+    width: 75rem;
 }
 
 @media only screen and (min-width: 768px) and (max-width: 1485px) {
     .secondSection .box {
-        width: 59rem;
+        width: 70rem;
     }
 }
 
 @media only screen and (max-width: 767px) {
     .secondSection {
-        height: 550px;
+        height: 650px;
     }
 
     .secondSection .box {
-        height: 450px;
+        height: 550px;
         width: 1px;
         flex-direction: column;
     }
@@ -24,4 +24,6 @@
     }
 }
 
-@media only screen and (max-width: 479px) {}
+@media only screen and (max-width: 479px) {
+    
+}
