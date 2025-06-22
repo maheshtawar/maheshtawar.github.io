@@ -21,17 +21,31 @@ var typed = new Typed("#element", {
 document.addEventListener("DOMContentLoaded", function () {
   const startDate = new Date("2024-03-04");
   const today = new Date();
-  const monthsCompleted = getMonthsCompleted(startDate, today);
-  document.getElementById("months-completed").innerText = `${monthsCompleted} months`;
+  const duration = getYearsAndMonths(startDate, today);
+  document.getElementById("months-completed").innerText = duration;
 
-  function getMonthsCompleted(startDate, endDate) {
-    const years = endDate.getFullYear() - startDate.getFullYear();
-    const months = endDate.getMonth() - startDate.getMonth();
-    let totalMonths = years * 12 + months;
-    // If the current date is before the start date day, subtract one month
+  function getYearsAndMonths(startDate, endDate) {
+    let years = endDate.getFullYear() - startDate.getFullYear();
+    let months = endDate.getMonth() - startDate.getMonth();
+
+    // Adjust for incomplete month
     if (endDate.getDate() < startDate.getDate()) {
-      totalMonths--;
+      months--;
     }
-    return totalMonths;
+
+    // Normalize negative months (e.g., if months = -1 after adjustment)
+    if (months < 0) {
+      years--;
+      months += 12;
+    }
+
+    let yearText = years > 0 ? `${years} year${years > 1 ? "s" : ""}` : "";
+    let monthText = months > 0 ? `${months} month${months > 1 ? "s" : ""}` : "";
+
+    if (yearText && monthText) {
+      return `${yearText} ${monthText}`;
+    } else {
+      return yearText || monthText || "0 months";
+    }
   }
 });
