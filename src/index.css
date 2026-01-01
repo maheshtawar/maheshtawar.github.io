@@ -3,6 +3,7 @@
 @import "primereact/resources/primereact.min.css";
 @import "primeicons/primeicons.css";
 @import "./styles/animations.css";
+@import "./styles/responsive.css";
 
 :root {
   --primary-color: #646db8;

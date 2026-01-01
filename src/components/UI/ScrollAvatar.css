@@ -1,0 +1,19 @@
+/* Desktop Default Styles */
+.scroll-avatar-container {
+    position: fixed;
+    bottom: 0px;
+    right: 20px;
+    width: auto;
+    height: 300px;
+    z-index: 999;
+    cursor: pointer;
+    pointer-events: none;
+    transform-origin: bottom right;
+}
+
+.scroll-avatar-img {
+    height: 100%;
+    width: auto;
+    filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.5));
+    pointer-events: auto;
+}

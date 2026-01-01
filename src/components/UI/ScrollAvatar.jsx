@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import anime from 'animejs/lib/anime.es.js';
+import './ScrollAvatar.css';
 
 const ScrollAvatar = () => {
     const avatarRef = useRef(null);
@@ -43,28 +44,12 @@ const ScrollAvatar = () => {
     return (
         <div
             ref={avatarRef}
-            className="scroll-character"
-            style={{
-                position: 'fixed',
-                bottom: '0px', // Anchor to bottom
-                right: '20px',
-                width: 'auto',
-                height: '300px', // Base height for the character
-                zIndex: 999,
-                cursor: 'pointer',
-                pointerEvents: 'none', // Let clicks pass through if covering content, or 'auto' if interactive
-                transformOrigin: 'bottom right'
-            }}
+            className="scroll-avatar-container scroll-character"
         >
             <img
                 src="/developer.png"
                 alt="Character"
-                style={{
-                    height: '100%',
-                    width: 'auto',
-                    filter: 'drop-shadow(0 0 10px rgba(0,0,0,0.5))',
-                    pointerEvents: 'auto' // Re-enable pointer events for the image itself
-                }}
+                className="scroll-avatar-img"
                 onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                 title="I'm here! Click to go up."
             />

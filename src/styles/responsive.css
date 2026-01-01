@@ -1,0 +1,126 @@
+/* Mobile Responsiveness Overrides */
+
+/* --- Tablet & Small Laptop (max-width: 1024px) --- */
+@media (max-width: 1024px) {
+
+    /* Global Container */
+    .container {
+        padding: 0 2rem;
+        /* Restore standard padding */
+        max-width: 100%;
+    }
+
+    /* Typography Scaling only - Keep layout similar to desktop if possible */
+    html {
+        font-size: 14px;
+    }
+
+    .hero-title {
+        font-size: 3rem !important;
+        line-height: 1.2;
+    }
+
+    /* Hero: On Tablet, we might still want side-by-side if it fits, or wrapped. 
+       Let's trust Flexbox wrapping instead of forcing column-reverse immediately, 
+       OR force column only if distinct wrapping needed. 
+       If we force column-reverse at 1024px, it looks like mobile. 
+       Let's stick to Desktop layout for 1024px but scale down.
+    */
+    /*
+    .hero-container {
+        // Remove forced column-reverse here. Let it stay row.
+        // If it overflows, users expect it to wrap naturally or we use media query 991px (PrimeFlex default).
+    }
+    */
+
+    /* Ensure sizing is contained */
+    .hero-visual {
+        max-width: 350px;
+    }
+
+    /* Remove Scroll Avatar static overrides - let it be dynamic but ensure z-index */
+    .scroll-avatar-container.scroll-character {
+        z-index: -5 !important;
+        opacity: 0.2 !important;
+    }
+}
+
+/* --- Mobile / Smaller Tablet (max-width: 768px) --- */
+@media (max-width: 768px) {
+
+    .container {
+        padding: 0 1.5rem;
+    }
+
+    section {
+        padding: 3rem 1.5rem !important;
+    }
+
+    .hero-container {
+        flex-direction: column-reverse;
+        /* Stack on mobile */
+        text-align: center;
+        padding-top: 2rem;
+    }
+
+    .hero-title {
+        font-size: 2rem !important;
+        /* Smaller to fit single line if possible */
+        line-height: 1.2;
+        word-break: keep-all;
+        /* Try to keep words together */
+        white-space: normal;
+        /* Allow wrapping between words */
+        display: block;
+        width: 100%;
+    }
+
+    /* Navbar adjustments */
+    .p-menubar {
+        padding: 0.5rem;
+    }
+
+    .p-menubar .p-menubar-start {
+        margin-right: auto;
+    }
+
+    @media (max-width: 480px) {
+        .p-menubar-end {
+            display: none;
+        }
+    }
+
+    /* Hero Visual - Smaller on mobile */
+    .hero-visual {
+        width: 100%;
+        max-width: 250px;
+        /* Even smaller visual to save space */
+        margin: 0 auto 1.5rem auto;
+    }
+
+    /* Project Cards - Compact for Mobile */
+    .p-carousel-item .border-1.surface-border {
+        padding: 1rem !important;
+        /* Less padding */
+    }
+
+    .p-carousel-item .pi-image {
+        font-size: 2rem !important;
+        /* Smaller placeholder icon */
+    }
+
+    /* Target the image container or actual image if present */
+    .p-carousel-item .mb-3>div {
+        height: 150px !important;
+        /* Force shorter image height */
+    }
+
+    /* Scroll Avatar - Mobile */
+    .scroll-avatar-container.scroll-character {
+        z-index: -5 !important;
+        height: 180px !important;
+        width: auto !important;
+        right: 10px !important;
+        opacity: 0.2 !important;
+    }
+}

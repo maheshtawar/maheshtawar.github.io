@@ -90,7 +90,7 @@ const AnimationDemo = () => {
             </div>
 
             {/* Grid Container */}
-            <div ref={gridRef} className="grid-container flex flex-wrap justify-content-center" style={{ width: '320px' }}></div>
+            <div ref={gridRef} className="grid-container flex flex-wrap justify-content-center" style={{ width: '100%', maxWidth: '320px' }}></div>
         </div>
     );
 };
