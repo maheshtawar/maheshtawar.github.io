@@ -1,52 +1,99 @@
 import { useEffect } from 'react';
-import { PrimeReactProvider } from 'primereact/api';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import Lenis from 'lenis';
 import { personalInfo } from './data/profile';
-import Navbar from './components/Layout/Navbar';
-import Footer from './components/Layout/Footer';
+import LaptopIntro from './components/UI/LaptopIntro';
+import MountainWorld from './components/World/MountainWorld';
+import MountainNav from './components/UI/MountainNav';
+import ScrollProgress from './components/UI/ScrollProgress';
 import Hero from './components/Sections/Hero';
 import Skills from './components/Sections/Skills';
-import Projects from './components/Sections/Projects';
 import Experience from './components/Sections/Experience';
-import Certificates from './components/Sections/Certificates';
+import Projects from './components/Sections/Projects';
 import Contact from './components/Sections/Contact';
-import ScrollAvatar from './components/UI/ScrollAvatar';
-import BackgroundParticles from './components/UI/BackgroundParticles';
+import './index.css';
+
+gsap.registerPlugin(ScrollTrigger);
 
 function App() {
   useEffect(() => {
-    // Dynamic Title
-    document.title = `${personalInfo.fullName} - Portfolio`;
+    // Dynamic document title
+    document.title = `${personalInfo.fullName} — Java Backend Developer & Full Stack Engineer`;
 
-    // Dynamic Meta Description
-    const metaDescription = document.querySelector('meta[name="description"]');
-    if (metaDescription) {
-      metaDescription.setAttribute('content', personalInfo.bio);
-    } else {
-      const meta = document.createElement('meta');
+    // Meta description
+    let meta = document.querySelector('meta[name="description"]');
+    if (!meta) {
+      meta = document.createElement('meta');
       meta.name = 'description';
-      meta.content = personalInfo.bio;
       document.head.appendChild(meta);
     }
+    meta.content = personalInfo.bio;
+
+    // Lenis smooth scroll
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
+      wheelMultiplier: 0.8,
+    });
+
+    // Sync Lenis with GSAP ticker
+    lenis.on('scroll', ScrollTrigger.update);
+    gsap.ticker.add((time) => {
+      lenis.raf(time * 1000);
+    });
+    gsap.ticker.lagSmoothing(0);
+
+    return () => {
+      lenis.destroy();
+      gsap.ticker.remove(lenis.raf);
+      ScrollTrigger.getAll().forEach(t => t.kill());
+    };
   }, []);
 
   return (
-    <PrimeReactProvider>
-      <div className="app-container">
-        <BackgroundParticles />
-        <Navbar />
-        <ScrollAvatar />
-        <main>
+    <div className="journey-container">
+      {/* Fixed mountain background */}
+      <MountainWorld />
+
+      {/* Fixed UI overlays */}
+      <MountainNav />
+      <ScrollProgress />
+
+      {/* Scrollable content */}
+      <div className="journey-content">
+        {/* Phase 1: Laptop Intro (scroll-driven, 400vh) */}
+        <LaptopIntro />
+
+        {/* Phase 2: Mountain world sections */}
+        <div style={{ position: 'relative', zIndex: 15 }}>
           <Hero />
           <Skills />
-          <Projects />
           <Experience />
-          <Certificates />
+          <Projects />
           <Contact />
-        </main>
-        <Footer />
+        </div>
+
+        {/* Footer */}
+        <footer style={{
+          position: 'relative',
+          zIndex: 15,
+          textAlign: 'center',
+          padding: '2rem',
+          borderTop: '1px solid rgba(255,255,255,0.05)',
+        }}>
+          <p className="text-mono" style={{
+            fontSize: '0.7rem',
+            color: 'var(--mountain-blue)',
+            letterSpacing: '0.1em',
+          }}>
+            © {new Date().getFullYear()} {personalInfo.fullName} · Built with passion
+          </p>
+        </footer>
       </div>
-    </PrimeReactProvider>
-  )
+    </div>
+  );
 }
 
-export default App
+export default App;

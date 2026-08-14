@@ -1,126 +1,131 @@
-/* Mobile Responsiveness Overrides */
+/* ============================================
+   RESPONSIVE DESIGN — Mobile-First Polish
+   ============================================ */
 
 /* --- Tablet & Small Laptop (max-width: 1024px) --- */
 @media (max-width: 1024px) {
+  .container {
+    padding: 0 1.5rem;
+    max-width: 100%;
+  }
 
-    /* Global Container */
-    .container {
-        padding: 0 2rem;
-        /* Restore standard padding */
-        max-width: 100%;
-    }
+  html {
+    font-size: 15px;
+  }
 
-    /* Typography Scaling only - Keep layout similar to desktop if possible */
-    html {
-        font-size: 14px;
-    }
-
-    .hero-title {
-        font-size: 3rem !important;
-        line-height: 1.2;
-    }
-
-    /* Hero: On Tablet, we might still want side-by-side if it fits, or wrapped. 
-       Let's trust Flexbox wrapping instead of forcing column-reverse immediately, 
-       OR force column only if distinct wrapping needed. 
-       If we force column-reverse at 1024px, it looks like mobile. 
-       Let's stick to Desktop layout for 1024px but scale down.
-    */
-    /*
-    .hero-container {
-        // Remove forced column-reverse here. Let it stay row.
-        // If it overflows, users expect it to wrap naturally or we use media query 991px (PrimeFlex default).
-    }
-    */
-
-    /* Ensure sizing is contained */
-    .hero-visual {
-        max-width: 350px;
-    }
-
-    /* Remove Scroll Avatar static overrides - let it be dynamic but ensure z-index */
-    .scroll-avatar-container.scroll-character {
-        z-index: -5 !important;
-        opacity: 0.2 !important;
-    }
+  /* Scroll Avatar */
+  .scroll-avatar-container.scroll-character {
+    z-index: -5 !important;
+    opacity: 0.15 !important;
+  }
 }
 
 /* --- Mobile / Smaller Tablet (max-width: 768px) --- */
 @media (max-width: 768px) {
+  .container {
+    padding: 0 1.25rem;
+  }
 
-    .container {
-        padding: 0 1.5rem;
-    }
+  section {
+    padding: 3.5rem 1.25rem !important;
+  }
 
-    section {
-        padding: 3rem 1.5rem !important;
-    }
+  .section-title {
+    font-size: 1.75rem !important;
+    margin-bottom: 2rem !important;
+  }
 
-    .hero-container {
-        flex-direction: column-reverse;
-        /* Stack on mobile */
-        text-align: center;
-        padding-top: 2rem;
-    }
+  /* Hero adjustments */
+  .hero-container {
+    flex-direction: column !important;
+    text-align: center;
+    padding-top: 1.5rem;
+  }
 
-    .hero-title {
-        font-size: 2rem !important;
-        /* Smaller to fit single line if possible */
-        line-height: 1.2;
-        word-break: keep-all;
-        /* Try to keep words together */
-        white-space: normal;
-        /* Allow wrapping between words */
-        display: block;
-        width: 100%;
-    }
+  .hero-content {
+    max-width: 100% !important;
+    align-items: center !important;
+  }
 
-    /* Navbar adjustments */
-    .p-menubar {
-        padding: 0.5rem;
-    }
+  .hero-visual {
+    width: 100% !important;
+    min-height: 200px !important;
+    order: -1;
+  }
 
-    .p-menubar .p-menubar-start {
-        margin-right: auto;
-    }
+  .hero-float-icon {
+    display: none !important;
+  }
 
-    @media (max-width: 480px) {
-        .p-menubar-end {
-            display: none;
-        }
-    }
+  /* Scroll Avatar - Mobile */
+  .scroll-avatar-container.scroll-character {
+    z-index: -5 !important;
+    height: 150px !important;
+    width: auto !important;
+    right: 10px !important;
+    opacity: 0.15 !important;
+  }
 
-    /* Hero Visual - Smaller on mobile */
-    .hero-visual {
-        width: 100%;
-        max-width: 250px;
-        /* Even smaller visual to save space */
-        margin: 0 auto 1.5rem auto;
-    }
+  /* Grid columns */
+  .glow-card {
+    min-width: 0 !important;
+  }
+}
 
-    /* Project Cards - Compact for Mobile */
-    .p-carousel-item .border-1.surface-border {
-        padding: 1rem !important;
-        /* Less padding */
-    }
+/* --- Small Phone (max-width: 480px) --- */
+@media (max-width: 480px) {
+  html {
+    font-size: 14px;
+  }
 
-    .p-carousel-item .pi-image {
-        font-size: 2rem !important;
-        /* Smaller placeholder icon */
-    }
+  .container {
+    padding: 0 1rem;
+  }
 
-    /* Target the image container or actual image if present */
-    .p-carousel-item .mb-3>div {
-        height: 150px !important;
-        /* Force shorter image height */
-    }
+  section {
+    padding: 3rem 1rem !important;
+  }
 
-    /* Scroll Avatar - Mobile */
-    .scroll-avatar-container.scroll-character {
-        z-index: -5 !important;
-        height: 180px !important;
-        width: auto !important;
-        right: 10px !important;
-        opacity: 0.2 !important;
-    }
+  .section-title {
+    font-size: 1.5rem !important;
+  }
+
+  .section-title::after {
+    width: 40px;
+  }
+
+  /* Hero mobile small */
+  .hero-name {
+    font-size: 2rem !important;
+  }
+
+  .hero-blob {
+    display: none;
+  }
+
+  .scroll-indicator {
+    display: none !important;
+  }
+}
+
+/* --- Touch devices: Disable custom cursor --- */
+@media (hover: none) and (pointer: coarse) {
+  * {
+    cursor: auto !important;
+  }
+}
+
+/* --- Reduced Motion --- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .hero-blob,
+  .hero-float-icon,
+  .scroll-indicator {
+    animation: none !important;
+  }
 }
