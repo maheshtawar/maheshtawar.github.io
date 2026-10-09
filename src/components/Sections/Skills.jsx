@@ -1,158 +1,194 @@
-import React, { useEffect, useRef } from 'react';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useState } from 'react';
+import { useReveal, useCardGlow } from '../../hooks/useAnimations';
 import { skills } from '../../data/profile';
+import { usePortfolio } from '../../context/PortfolioContext';
+import SkillConstellation from './SkillConstellation';
 
-gsap.registerPlugin(ScrollTrigger);
-
-const SkillMarker = ({ skill, index, total }) => {
-  const ref = useRef(null);
-
-  useEffect(() => {
-    if (!ref.current) return;
-    gsap.fromTo(ref.current,
-      { opacity: 0, x: index % 2 === 0 ? -40 : 40, scale: 0.8 },
-      {
-        opacity: 1, x: 0, scale: 1,
-        duration: 0.8,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: ref.current,
-          start: 'top 85%',
-          toggleActions: 'play none none reverse',
-        },
-      }
-    );
-  }, [index]);
+const SkillCard = ({ skill, isExpanded, onToggle, isHighlighted }) => {
+  const cardGlow = useCardGlow();
 
   return (
-    <div ref={ref} className="glass-subtle" style={{
-      padding: '1.25rem 1.5rem',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '1rem',
-      transition: 'all 0.3s var(--ease-out)',
-      cursor: 'default',
-    }}
-    onMouseEnter={e => {
-      e.currentTarget.style.border = '1px solid rgba(111, 168, 255, 0.3)';
-      e.currentTarget.style.boxShadow = '0 0 30px rgba(111, 168, 255, 0.1)';
-      e.currentTarget.style.transform = 'translateY(-2px)';
-    }}
-    onMouseLeave={e => {
-      e.currentTarget.style.border = '1px solid rgba(255, 255, 255, 0.05)';
-      e.currentTarget.style.boxShadow = 'none';
-      e.currentTarget.style.transform = 'translateY(0)';
-    }}
+    <div
+      className={`card ${isHighlighted ? 'highlighted-item' : ''}`}
+      style={{
+        padding: 'var(--space-md)',
+        cursor: 'pointer',
+        border: isHighlighted ? '1.5px solid var(--accent)' : '1px solid var(--border)',
+        boxShadow: isHighlighted ? '0 0 20px var(--accent-glow)' : 'none',
+        transition: 'all 0.25s ease',
+      }}
+      onClick={onToggle}
+      {...cardGlow}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onToggle(); } }}
+      aria-expanded={isExpanded}
     >
-      {/* Glow dot */}
-      <div style={{
-        width: '8px', height: '8px', borderRadius: '50%',
-        background: 'var(--accent)',
-        boxShadow: '0 0 12px var(--glow)',
-        flexShrink: 0,
-      }} />
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {isHighlighted && <span style={{ color: 'var(--accent)', fontSize: '0.8rem' }}>★</span>}
+          <span style={{ fontSize: '0.9rem', fontWeight: 600, color: isHighlighted ? 'var(--accent-light)' : 'var(--text-primary)' }}>
+            {skill.name}
+          </span>
+        </div>
+        <svg
+          width="14" height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="var(--text-muted)"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          style={{ transition: 'transform 0.2s var(--ease-out)', transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)' }}
+        >
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      </div>
+      {isExpanded && (
+        <p className="text-small" style={{ marginTop: 'var(--space-sm)', fontSize: '0.78rem', lineHeight: 1.5, color: 'var(--text-muted)' }}>
+          {skill.description}
+        </p>
+      )}
+    </div>
+  );
+};
 
-      <div style={{ flex: 1 }}>
-        <div style={{
-          fontSize: '0.95rem',
-          fontWeight: 600,
-          color: 'var(--text-primary)',
-        }}>{skill.name}</div>
+const CategoryGroup = ({ category, categoryIndex, expandedSkill, onToggleSkill, selectedTech }) => {
+  const catRef = useReveal({ rootMargin: '0px 0px -40px 0px' });
+
+  return (
+    <div className="reveal" ref={catRef}>
+      {/* Category Header */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', marginBottom: 'var(--space-md)' }}>
+        <span style={{ fontSize: '1.2rem' }}>{category.icon}</span>
+        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+          {category.category}
+        </h3>
+        <span className="text-mono" style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginLeft: 'auto' }}>
+          {category.items.length} skills
+        </span>
       </div>
 
-      {/* Level bar */}
-      <div style={{
-        width: '80px', height: '3px',
-        background: 'rgba(255,255,255,0.1)',
-        borderRadius: '2px',
-        overflow: 'hidden',
-      }}>
-        <div style={{
-          width: `${skill.level}%`,
-          height: '100%',
-          background: 'linear-gradient(90deg, var(--accent), var(--warm-sunlight))',
-          borderRadius: '2px',
-          transition: 'width 1s var(--ease-out)',
-        }} />
+      {/* Skill Items */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+        {category.items.map((skill, si) => {
+          const isHighlighted = selectedTech && (
+            skill.name.toLowerCase().includes(selectedTech.toLowerCase()) ||
+            selectedTech.toLowerCase().includes(skill.name.toLowerCase())
+          );
+          return (
+            <SkillCard
+              key={`${categoryIndex}-${si}`}
+              skill={skill}
+              isExpanded={expandedSkill === `${categoryIndex}-${si}`}
+              isHighlighted={Boolean(isHighlighted)}
+              onToggle={() => onToggleSkill(`${categoryIndex}-${si}`)}
+            />
+          );
+        })}
       </div>
     </div>
   );
 };
 
 const Skills = () => {
-  const sectionRef = useRef(null);
-  const titleRef = useRef(null);
+  const headerRef = useReveal();
+  const { selectedTech, clearTechFilter } = usePortfolio();
+  const [activeFilter, setActiveFilter] = useState('All');
+  const [expandedSkill, setExpandedSkill] = useState(null);
 
-  useEffect(() => {
-    if (!titleRef.current) return;
-    gsap.fromTo(titleRef.current,
-      { opacity: 0, y: 50 },
-      {
-        opacity: 1, y: 0, duration: 1,
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: 'top 75%',
-          toggleActions: 'play none none reverse',
-        },
-      }
-    );
-  }, []);
+  const categories = ['All', ...skills.map(s => s.category)];
+  const filtered = activeFilter === 'All' ? skills : skills.filter(s => s.category === activeFilter);
 
   return (
-    <section
-      id="skills"
-      ref={sectionRef}
-      className="journey-section"
-      style={{ minHeight: '100vh', padding: '6rem 0' }}
-    >
-      <div className="section-content">
-        {/* Section header */}
-        <div ref={titleRef} style={{ marginBottom: '4rem', textAlign: 'center' }}>
-          <span className="text-label">Elevation I</span>
-          <h2 className="heading-section" style={{
-            marginTop: '0.5rem',
-            background: 'linear-gradient(180deg, var(--text-primary) 0%, var(--fog-gray) 100%)',
-            WebkitBackgroundClip: 'text',
-            backgroundClip: 'text',
-            color: 'transparent',
-          }}>
-            Tools I Climb With
-          </h2>
+    <section id="skills" className="section">
+      <div className="container">
+        {/* Header */}
+        <div className="section-header reveal" ref={headerRef}>
+          <span className="text-label">Skills & Systems Ecosystem</span>
+          <h2 className="heading-section">Architecture & Technical Stack</h2>
+          <p className="text-body">
+            Specialized in enterprise backend architecture with production experience spanning high-throughput APIs, caching, and data pipelines.
+          </p>
         </div>
 
-        {/* Skills grid */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-          gap: '2rem',
-        }}>
-          {skills.map((category, ci) => (
-            <div key={ci} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              {/* Category header */}
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: '0.75rem',
-                marginBottom: '0.5rem', paddingLeft: '0.5rem',
-              }}>
-                <div style={{
-                  width: '3px', height: '20px',
-                  background: 'var(--accent)',
-                  borderRadius: '2px',
-                }} />
-                <span className="text-mono" style={{ color: 'var(--fog-gray)', fontWeight: 600 }}>
-                  {category.title}
-                </span>
-              </div>
+        {/* Part 1: Interactive Constellation Graph */}
+        <div style={{ marginBottom: 'var(--space-3xl)' }}>
+          <SkillConstellation />
+        </div>
 
-              {category.items.map((skill, si) => (
-                <SkillMarker
-                  key={si}
-                  skill={skill}
-                  index={ci * 10 + si}
-                  total={category.items.length}
-                />
-              ))}
-            </div>
+        {/* Global Active Filter Indicator (if selected) */}
+        {selectedTech && (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '12px',
+              padding: '10px 18px',
+              borderRadius: '9999px',
+              background: 'var(--accent-subtle)',
+              border: '1px solid var(--border-accent)',
+              maxWidth: 'fit-content',
+              margin: '0 auto var(--space-xl) auto',
+            }}
+          >
+            <span className="text-mono" style={{ fontSize: '0.8rem', color: 'var(--accent-light)' }}>
+              Filtering by: <strong>{selectedTech}</strong>
+            </span>
+            <button
+              onClick={clearTechFilter}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: 'var(--text-muted)',
+                cursor: 'pointer',
+                fontSize: '0.85rem',
+                fontWeight: 'bold',
+              }}
+              title="Clear technology filter"
+            >
+              ✕ Clear
+            </button>
+          </div>
+        )}
+
+        {/* Category Filter Tabs */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          gap: 'var(--space-xs)',
+          flexWrap: 'wrap',
+          marginBottom: 'var(--space-2xl)',
+        }}>
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              className={`tag${activeFilter === cat ? ' active' : ''}`}
+              onClick={() => setActiveFilter(cat)}
+              style={{
+                cursor: 'pointer',
+                borderColor: activeFilter === cat ? 'var(--accent)' : 'var(--border)',
+                background: activeFilter === cat ? 'var(--accent-subtle)' : 'var(--bg-tertiary)',
+                color: activeFilter === cat ? 'var(--accent)' : 'var(--text-secondary)',
+              }}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+
+        {/* Skills Grid with Cross-Highlighting */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 'var(--space-xl)', maxWidth: '1000px', margin: '0 auto' }}>
+          {filtered.map((category, ci) => (
+            <CategoryGroup
+              key={category.category}
+              category={category}
+              categoryIndex={ci}
+              expandedSkill={expandedSkill}
+              selectedTech={selectedTech}
+              onToggleSkill={(id) => setExpandedSkill(expandedSkill === id ? null : id)}
+            />
           ))}
         </div>
       </div>

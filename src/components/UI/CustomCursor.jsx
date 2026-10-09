@@ -1,110 +1,156 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const CustomCursor = () => {
-  const cursorRef = useRef(null);
-  
-  useEffect(() => {
-    // Hide native cursor
-    document.body.style.cursor = 'none';
+  const dotRef = useRef(null);
+  const ringRef = useRef(null);
+  const [cursorText, setCursorText] = useState('');
+  const [isHovering, setIsHovering] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
 
-    let mouseX = window.innerWidth / 2;
-    let mouseY = window.innerHeight / 2;
-    let cursorX = window.innerWidth / 2;
-    let cursorY = window.innerHeight / 2;
-    
-    let isHovering = false;
-    let isClicking = false;
-    let animationId;
+  useEffect(() => {
+    // Only enable custom cursor on non-touch desktop devices with fine pointer
+    const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0 || window.matchMedia('(pointer: coarse)').matches;
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (isTouch || prefersReducedMotion) return;
+
+    let mouseX = -100;
+    let mouseY = -100;
+    let ringX = -100;
+    let ringY = -100;
+    let animId = null;
 
     const onMouseMove = (e) => {
       mouseX = e.clientX;
       mouseY = e.clientY;
+      if (!isVisible) setIsVisible(true);
+
+      if (dotRef.current) {
+        dotRef.current.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0) translate(-50%, -50%)`;
+      }
     };
 
-    const onMouseDown = () => (isClicking = true);
-    const onMouseUp = () => (isClicking = false);
-
-    // Magnetic / Hover detection
     const onMouseOver = (e) => {
-      if (e.target.closest('a, button, .magnetic, .glow-card')) {
-        isHovering = true;
+      const target = e.target;
+      if (!target || !(target instanceof HTMLElement)) return;
+
+      const projectEl = target.closest('[data-cursor="project"], .project-card, .project-card-interactive');
+      const exploreEl = target.closest('[data-cursor="explore"], .avatar-container');
+      const terminalEl = target.closest('[data-cursor="terminal"], .terminal-container');
+      const buttonEl = target.closest('button, a, .magnetic-btn, .tag, input, textarea, select');
+
+      if (projectEl) {
+        setCursorText('VIEW →');
+        setIsHovering(true);
+      } else if (exploreEl) {
+        setCursorText('EXPLORE');
+        setIsHovering(true);
+      } else if (terminalEl) {
+        setCursorText('CLI');
+        setIsHovering(true);
+      } else if (buttonEl) {
+        setCursorText('');
+        setIsHovering(true);
       } else {
-        isHovering = false;
+        setCursorText('');
+        setIsHovering(false);
       }
     };
 
-    window.addEventListener('mousemove', onMouseMove);
-    window.addEventListener('mousedown', onMouseDown);
-    window.addEventListener('mouseup', onMouseUp);
-    window.addEventListener('mouseover', onMouseOver);
-
-    const render = () => {
-      if (!cursorRef.current) return;
-
-      // Spring physics
-      cursorX += (mouseX - cursorX) * 0.15;
-      cursorY += (mouseY - cursorY) * 0.15;
-
-      // Determine size based on state
-      let size = 20;
-      if (isHovering) size = 80;
-      if (isClicking) size -= 10;
-
-      cursorRef.current.style.transform = `translate3d(${cursorX}px, ${cursorY}px, 0) translate(-50%, -50%)`;
-      cursorRef.current.style.width = `${size}px`;
-      cursorRef.current.style.height = `${size}px`;
-      
-      // If hovering, add text "VIEW" or mix-blend-mode difference
-      if (isHovering) {
-        cursorRef.current.style.mixBlendMode = 'difference';
-        cursorRef.current.style.background = '#fff';
-        cursorRef.current.style.border = 'none';
-      } else {
-        cursorRef.current.style.mixBlendMode = 'normal';
-        cursorRef.current.style.background = 'transparent';
-        cursorRef.current.style.border = '2px solid rgba(255, 51, 102, 0.5)';
-      }
-
-      animationId = requestAnimationFrame(render);
+    const onMouseLeave = () => {
+      setIsVisible(false);
     };
 
-    render();
+    window.addEventListener('mousemove', onMouseMove, { passive: true });
+    window.addEventListener('mouseover', onMouseOver, { passive: true });
+    document.addEventListener('mouseleave', onMouseLeave);
+
+    const lerp = (a, b, n) => (1 - n) * a + n * b;
+
+    const renderRing = () => {
+      ringX = lerp(ringX, mouseX, 0.18);
+      ringY = lerp(ringY, mouseY, 0.18);
+
+      if (ringRef.current) {
+        ringRef.current.style.transform = `translate3d(${ringX}px, ${ringY}px, 0) translate(-50%, -50%)`;
+      }
+
+      animId = requestAnimationFrame(renderRing);
+    };
+
+    animId = requestAnimationFrame(renderRing);
 
     return () => {
-      cancelAnimationFrame(animationId);
       window.removeEventListener('mousemove', onMouseMove);
-      window.removeEventListener('mousedown', onMouseDown);
-      window.removeEventListener('mouseup', onMouseUp);
       window.removeEventListener('mouseover', onMouseOver);
-      document.body.style.cursor = 'auto';
+      document.removeEventListener('mouseleave', onMouseLeave);
+      if (animId) cancelAnimationFrame(animId);
     };
-  }, []);
+  }, [isVisible]);
 
   return (
-    <div
-      ref={cursorRef}
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '20px',
-        height: '20px',
-        borderRadius: '50%',
-        pointerEvents: 'none',
-        zIndex: 10000,
-        transition: 'width 0.3s cubic-bezier(0.16, 1, 0.3, 1), height 0.3s cubic-bezier(0.16, 1, 0.3, 1), background 0.3s ease, border 0.3s ease',
-        willChange: 'transform, width, height',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        color: '#000',
-        fontFamily: 'var(--font-mono)',
-        fontSize: '12px',
-        fontWeight: 'bold',
-      }}
-    >
-      {/* Optional: Add dynamic text inside the cursor based on context */}
-    </div>
+    <>
+      {/* Precision center dot */}
+      <div
+        ref={dotRef}
+        aria-hidden="true"
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '6px',
+          height: '6px',
+          borderRadius: '50%',
+          backgroundColor: 'var(--accent)',
+          pointerEvents: 'none',
+          zIndex: 99999,
+          opacity: isVisible ? (cursorText ? 0 : 1) : 0,
+          transition: 'opacity 0.2s ease, width 0.2s ease, height 0.2s ease',
+          willChange: 'transform',
+        }}
+      />
+
+      {/* Trailing follower ring with context text */}
+      <div
+        ref={ringRef}
+        aria-hidden="true"
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: cursorText ? '84px' : isHovering ? '44px' : '26px',
+          height: cursorText ? '84px' : isHovering ? '44px' : '26px',
+          borderRadius: '50%',
+          border: cursorText
+            ? '1px solid rgba(99, 102, 241, 0.8)'
+            : isHovering
+            ? '1.5px solid rgba(99, 102, 241, 0.6)'
+            : '1px solid rgba(255, 255, 255, 0.25)',
+          backgroundColor: cursorText
+            ? 'rgba(15, 23, 42, 0.85)'
+            : isHovering
+            ? 'rgba(99, 102, 241, 0.08)'
+            : 'transparent',
+          backdropFilter: cursorText ? 'blur(8px)' : 'none',
+          WebkitBackdropFilter: cursorText ? 'blur(8px)' : 'none',
+          pointerEvents: 'none',
+          zIndex: 99998,
+          opacity: isVisible ? 1 : 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: 'var(--accent-light)',
+          fontFamily: 'var(--font-mono)',
+          fontSize: '0.65rem',
+          fontWeight: 700,
+          letterSpacing: '0.05em',
+          transition: 'width 0.25s cubic-bezier(0.16, 1, 0.3, 1), height 0.25s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease, border-color 0.2s ease, opacity 0.2s ease',
+          boxShadow: cursorText ? '0 0 20px rgba(99, 102, 241, 0.35)' : 'none',
+          willChange: 'transform',
+        }}
+      >
+        {cursorText}
+      </div>
+    </>
   );
 };
 

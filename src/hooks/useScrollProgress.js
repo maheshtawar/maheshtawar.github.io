@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -30,15 +30,8 @@ export function useScrollProgress() {
 
 /**
  * Pin an element and scrub an animation timeline across a scroll range.
- * 
- * @param {Object} opts
- * @param {string} opts.trigger - CSS selector for trigger element
- * @param {string} opts.start - ScrollTrigger start position  
- * @param {string} opts.end - ScrollTrigger end position
- * @param {boolean} opts.pin - Whether to pin the trigger element
- * @param {Function} opts.onUpdate - Callback with progress (0..1)
  */
-export function useScrollSection(opts) {
+export function useScrollSection(opts = {}) {
   const triggerRef = useRef(null);
 
   useEffect(() => {
@@ -56,7 +49,8 @@ export function useScrollSection(opts) {
     });
 
     return () => st.kill();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [opts.start, opts.end, opts.pin, opts.scrub]);
 
   return triggerRef;
 }
@@ -70,7 +64,7 @@ export function useScrollReveal(opts = {}) {
   useEffect(() => {
     if (!elementRef.current) return;
 
-    gsap.fromTo(
+    const anim = gsap.fromTo(
       elementRef.current,
       { opacity: 0, y: opts.y ?? 60 },
       {
@@ -85,7 +79,11 @@ export function useScrollReveal(opts = {}) {
         },
       }
     );
-  }, []);
+
+    return () => {
+      anim.kill();
+    };
+  }, [opts.y, opts.duration, opts.start]);
 
   return elementRef;
 }

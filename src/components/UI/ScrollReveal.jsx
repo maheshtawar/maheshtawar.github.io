@@ -19,13 +19,15 @@ const ScrollReveal = ({ children, animation = 'animate-fade-up', delay = 0, clas
       }
     );
 
-    if (ref.current) {
-      observer.observe(ref.current);
+    const el = ref.current;
+    if (el) {
+      observer.observe(el);
     }
 
     return () => {
-      if (ref.current) observer.unobserve(ref.current);
+      if (el) observer.unobserve(el);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

@@ -1,212 +1,276 @@
-import React, { useEffect, useRef } from 'react';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useState } from 'react';
+import { useReveal } from '../../hooks/useAnimations';
 import { projects } from '../../data/profile';
+import { usePortfolio } from '../../context/PortfolioContext';
 
-gsap.registerPlugin(ScrollTrigger);
+// Interactive Architecture Flow Layer definitions
+const ARCHITECTURE_LAYERS = [
+  {
+    name: 'Client / UI',
+    tech: 'Vue 3 / Tkinter',
+    detail: 'Responsive frontend interface handling user inputs, validation, and reactive state updates.',
+    techKeywords: ['Vue 3', 'React', 'HTML5', 'Tkinter'],
+  },
+  {
+    name: 'API Gateway',
+    tech: 'REST / Reverse Proxy',
+    detail: 'Handles routing, request rate-limiting, CORS, and token validation (JWE / AES encryption).',
+    techKeywords: ['REST APIs', 'Spring Security', 'Nginx'],
+  },
+  {
+    name: 'Business Core',
+    tech: 'Java 17 / Spring Boot',
+    detail: 'Service layer implementing Strategy Pattern, transactional boundaries, and multi-tenant isolation.',
+    techKeywords: ['Java 17', 'Spring Boot', 'Microservices', 'Python'],
+  },
+  {
+    name: 'Cache Layer',
+    tech: 'Redis In-Memory',
+    detail: 'Buffers OTP flows and frequent tenant configs; bypassed 85% of redundant DB queries.',
+    techKeywords: ['Redis'],
+  },
+  {
+    name: 'Persistence',
+    tech: 'MySQL 8.0 / JDBC',
+    detail: 'ACID transactional persistence with optimized indexes, stored procedures, and audit trail tables.',
+    techKeywords: ['MySQL', 'JDBC / JdbcTemplate', 'SQL'],
+  },
+];
 
-const ProjectPortal = ({ project, index }) => {
-  const ref = useRef(null);
+// Project Detail Case Study Modal
+const ProjectModal = ({ project, onClose }) => {
+  const [selectedLayerIndex, setSelectedLayerIndex] = useState(2); // Default to Business Core
 
-  useEffect(() => {
-    if (!ref.current) return;
-    gsap.fromTo(ref.current,
-      { opacity: 0, y: 60, rotateY: index % 2 === 0 ? -5 : 5 },
-      {
-        opacity: 1, y: 0, rotateY: 0,
-        duration: 1,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: ref.current,
-          start: 'top 85%',
-          toggleActions: 'play none none reverse',
-        },
-      }
-    );
-  }, [index]);
+  if (!project) return null;
+
+  const currentLayer = ARCHITECTURE_LAYERS[selectedLayerIndex];
 
   return (
     <div
-      ref={ref}
-      className="glass"
-      style={{
-        padding: '2px',
-        borderRadius: '20px',
-        overflow: 'hidden',
-        background: 'linear-gradient(135deg, rgba(111,168,255,0.15), rgba(11,20,32,0.8))',
-        transition: 'all 0.4s var(--ease-out)',
-        cursor: 'default',
-        perspective: '1000px',
-      }}
-      onMouseEnter={e => {
-        e.currentTarget.style.transform = 'translateY(-8px)';
-        e.currentTarget.style.boxShadow = '0 20px 60px rgba(111, 168, 255, 0.15)';
-      }}
-      onMouseLeave={e => {
-        e.currentTarget.style.transform = 'translateY(0)';
-        e.currentTarget.style.boxShadow = 'none';
-      }}
+      className="modal-overlay"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label={`${project.title} case study`}
+      style={{ zIndex: 10005, padding: 'clamp(1rem, 4vw, 2.5rem)' }}
     >
-      <div style={{
-        background: 'rgba(8, 11, 16, 0.9)',
-        borderRadius: '18px',
-        overflow: 'hidden',
-      }}>
-        {/* Project preview area */}
-        <div style={{
-          height: '200px',
-          background: `linear-gradient(135deg, ${
-            index === 0 ? '#1a1a2e, #16213e' :
-            index === 1 ? '#0f1923, #1a2d40' :
-            '#1a1a1a, #2d2d2d'
-          })`,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          position: 'relative',
-          overflow: 'hidden',
-        }}>
-          {/* Decorative grid */}
-          <div style={{
-            position: 'absolute',
-            inset: 0,
-            backgroundImage: `
-              linear-gradient(rgba(111,168,255,0.03) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(111,168,255,0.03) 1px, transparent 1px)
-            `,
-            backgroundSize: '30px 30px',
-          }} />
+      <div
+        className="modal-content"
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          maxWidth: '840px',
+          maxHeight: '90vh',
+          overflowY: 'auto',
+          padding: 'clamp(1.5rem, 4vw, 2.5rem)',
+          border: '1px solid var(--border-accent)',
+          boxShadow: '0 25px 60px rgba(0, 0, 0, 0.7), 0 0 35px var(--accent-glow)',
+        }}
+      >
+        <button
+          className="modal-close"
+          onClick={onClose}
+          aria-label="Close modal"
+          style={{ position: 'absolute', top: '1.2rem', right: '1.2rem' }}
+        >
+          ✕
+        </button>
 
-          {/* Project icon */}
-          <div style={{
-            fontSize: '3rem',
-            fontFamily: 'var(--font-display)',
-            fontWeight: 800,
-            color: 'rgba(111, 168, 255, 0.2)',
-            letterSpacing: '-0.05em',
-          }}>
-            {project.title.split(' ').map(w => w[0]).join('')}
+        {/* Modal Header */}
+        <div style={{ marginBottom: 'var(--space-xl)', paddingRight: '2rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+            <span className="badge" style={{ background: 'var(--accent-subtle)', color: 'var(--accent-light)' }}>
+              {project.category} CASE STUDY
+            </span>
+            {project.featured && (
+              <span className="badge" style={{ background: 'rgba(34, 197, 94, 0.15)', color: 'var(--success)' }}>
+                FEATURED PRODUCTION
+              </span>
+            )}
           </div>
-
-          {/* Floating accent orb */}
-          <div style={{
-            position: 'absolute',
-            top: '20%',
-            right: '15%',
-            width: '60px',
-            height: '60px',
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(111,168,255,0.15), transparent)',
-            filter: 'blur(10px)',
-            animation: 'float 4s ease-in-out infinite',
-          }} />
-        </div>
-
-        {/* Content */}
-        <div style={{ padding: '1.5rem' }}>
-          <h3 style={{
-            fontSize: '1.15rem',
-            fontFamily: 'var(--font-display)',
-            fontWeight: 600,
-            color: 'var(--text-primary)',
-            marginBottom: '0.25rem',
-          }}>
+          <h3 className="heading-section" style={{ fontSize: '1.75rem', marginBottom: '4px' }}>
             {project.title}
           </h3>
-          <p className="text-mono" style={{
-            fontSize: '0.7rem',
-            color: 'var(--accent)',
-            marginBottom: '0.75rem',
-          }}>
+          <p className="text-mono" style={{ color: 'var(--accent)', fontSize: '0.85rem' }}>
             {project.subtitle}
           </p>
-          <p style={{
-            fontSize: '0.85rem',
-            color: 'var(--mountain-blue)',
-            lineHeight: 1.5,
-            marginBottom: '1rem',
-          }}>
-            {project.description}
-          </p>
+        </div>
 
-          {/* Tags */}
-          <div style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: '0.4rem',
-            marginBottom: '1.25rem',
-          }}>
+        {/* Executive Problem vs Solution Grid */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+            gap: 'var(--space-md)',
+            marginBottom: 'var(--space-xl)',
+          }}
+        >
+          <div
+            style={{
+              padding: 'var(--space-md)',
+              borderRadius: 'var(--radius-md)',
+              background: 'rgba(239, 68, 68, 0.06)',
+              border: '1px solid rgba(239, 68, 68, 0.2)',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
+              <span style={{ color: 'var(--error)' }}>⚠️</span>
+              <strong className="text-mono" style={{ fontSize: '0.75rem', color: 'var(--error)', textTransform: 'uppercase' }}>
+                Engineering Problem
+              </strong>
+            </div>
+            <p className="text-small" style={{ color: 'var(--text-secondary)' }}>
+              {project.problem}
+            </p>
+          </div>
+
+          <div
+            style={{
+              padding: 'var(--space-md)',
+              borderRadius: 'var(--radius-md)',
+              background: 'rgba(34, 197, 94, 0.06)',
+              border: '1px solid rgba(34, 197, 94, 0.2)',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
+              <span style={{ color: 'var(--success)' }}>✓</span>
+              <strong className="text-mono" style={{ fontSize: '0.75rem', color: 'var(--success)', textTransform: 'uppercase' }}>
+                Engineered Solution
+              </strong>
+            </div>
+            <p className="text-small" style={{ color: 'var(--text-secondary)' }}>
+              {project.solution}
+            </p>
+          </div>
+        </div>
+
+        {/* Interactive Architecture Flow Diagram */}
+        <div
+          style={{
+            marginBottom: 'var(--space-xl)',
+            padding: 'var(--space-md)',
+            background: 'var(--bg-tertiary)',
+            borderRadius: 'var(--radius-lg)',
+            border: '1px solid var(--border)',
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+            <span className="text-label" style={{ color: 'var(--accent-light)' }}>
+              Interactive End-to-End Architecture Flow
+            </span>
+            <span className="text-mono" style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>
+              CLICK ANY NODE TO INSPECT
+            </span>
+          </div>
+
+          {/* Interactive Flow Pipeline Nodes */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              overflowX: 'auto',
+              paddingBottom: '8px',
+            }}
+          >
+            {ARCHITECTURE_LAYERS.map((layer, index) => {
+              const isSelected = index === selectedLayerIndex;
+              return (
+                <div key={layer.name} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <button
+                    onClick={() => setSelectedLayerIndex(index)}
+                    style={{
+                      padding: '8px 12px',
+                      borderRadius: '8px',
+                      background: isSelected ? 'var(--accent)' : 'var(--bg-secondary)',
+                      color: isSelected ? '#ffffff' : 'var(--text-secondary)',
+                      border: isSelected ? '1px solid var(--accent-light)' : '1px solid var(--border)',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      whiteSpace: 'nowrap',
+                      transition: 'all 0.2s ease',
+                      boxShadow: isSelected ? '0 0 14px var(--accent-glow)' : 'none',
+                    }}
+                  >
+                    <div style={{ fontSize: '0.75rem', fontWeight: 600 }}>{layer.name}</div>
+                    <div className="text-mono" style={{ fontSize: '0.65rem', opacity: isSelected ? 0.9 : 0.6 }}>
+                      {layer.tech}
+                    </div>
+                  </button>
+                  {index < ARCHITECTURE_LAYERS.length - 1 && (
+                    <span style={{ color: 'var(--accent)', fontSize: '0.8rem', opacity: 0.7 }}>➔</span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Active Layer Deep Dive Card */}
+          <div
+            style={{
+              marginTop: '12px',
+              padding: '12px 14px',
+              borderRadius: '8px',
+              background: 'var(--bg-secondary)',
+              border: '1px solid var(--border-accent)',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+              <span className="badge" style={{ background: 'var(--accent-subtle)', color: 'var(--accent-light)', fontSize: '0.7rem' }}>
+                {currentLayer.name} Layer
+              </span>
+              <span className="text-mono" style={{ fontSize: '0.75rem', color: 'var(--text-primary)' }}>
+                {currentLayer.tech}
+              </span>
+            </div>
+            <p className="text-small" style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+              {currentLayer.detail}
+            </p>
+          </div>
+        </div>
+
+        {/* Key Engineering Features */}
+        {project.keyFeatures && (
+          <div style={{ marginBottom: 'var(--space-xl)' }}>
+            <span className="text-label" style={{ display: 'block', marginBottom: 'var(--space-sm)' }}>
+              Core Engineering Achievements
+            </span>
+            <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              {project.keyFeatures.map((f, i) => (
+                <li key={i} style={{ display: 'flex', gap: '0.6rem', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                  <span style={{ color: 'var(--accent)', marginTop: '0.2rem', fontSize: '0.5rem' }}>▸</span>
+                  <span>{f}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* Technologies Used */}
+        <div style={{ marginBottom: 'var(--space-xl)' }}>
+          <span className="text-label" style={{ display: 'block', marginBottom: 'var(--space-sm)' }}>
+            Technologies & Tools
+          </span>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
             {project.tags.map((tag, i) => (
-              <span key={i} style={{
-                fontSize: '0.65rem',
-                fontFamily: 'var(--font-mono)',
-                padding: '0.2rem 0.5rem',
-                borderRadius: '4px',
-                background: 'rgba(111, 168, 255, 0.1)',
-                color: 'var(--accent)',
-                border: '1px solid rgba(111, 168, 255, 0.15)',
-              }}>
+              <span key={i} className="tag">
                 {tag}
               </span>
             ))}
           </div>
+        </div>
 
-          {/* Links */}
-          <div style={{
-            display: 'flex',
-            gap: '1rem',
-          }}>
-            {project.github && (
-              <a
-                href={project.github}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.4rem',
-                  fontSize: '0.75rem',
-                  fontFamily: 'var(--font-mono)',
-                  color: 'var(--fog-gray)',
-                  textDecoration: 'none',
-                  transition: 'color 0.3s',
-                }}
-                onMouseEnter={e => e.currentTarget.style.color = 'var(--accent)'}
-                onMouseLeave={e => e.currentTarget.style.color = 'var(--fog-gray)'}
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-                </svg>
-                GitHub
-              </a>
-            )}
-            {project.demo && (
-              <a
-                href={project.demo}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.4rem',
-                  fontSize: '0.75rem',
-                  fontFamily: 'var(--font-mono)',
-                  color: 'var(--fog-gray)',
-                  textDecoration: 'none',
-                  transition: 'color 0.3s',
-                }}
-                onMouseEnter={e => e.currentTarget.style.color = 'var(--accent)'}
-                onMouseLeave={e => e.currentTarget.style.color = 'var(--fog-gray)'}
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-                  <polyline points="15 3 21 3 21 9"/>
-                  <line x1="10" y1="14" x2="21" y2="3"/>
-                </svg>
-                Demo
-              </a>
-            )}
-          </div>
+        {/* Action Links */}
+        <div style={{ display: 'flex', gap: 'var(--space-md)', flexWrap: 'wrap' }}>
+          {project.github && (
+            <a href={project.github} target="_blank" rel="noopener noreferrer" className="btn btn-primary">
+              View Source Repository ↗
+            </a>
+          )}
+          {project.demo && (
+            <a href={project.demo} target="_blank" rel="noopener noreferrer" className="btn btn-secondary">
+              Live Preview / Video Demo ↗
+            </a>
+          )}
         </div>
       </div>
     </div>
@@ -214,55 +278,193 @@ const ProjectPortal = ({ project, index }) => {
 };
 
 const Projects = () => {
-  const sectionRef = useRef(null);
-  const titleRef = useRef(null);
+  const headerRef = useReveal();
+  const { selectedTech } = usePortfolio();
+  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [activeModalProject, setActiveModalProject] = useState(null);
 
-  useEffect(() => {
-    if (!titleRef.current) return;
-    gsap.fromTo(titleRef.current,
-      { opacity: 0, y: 50 },
-      {
-        opacity: 1, y: 0, duration: 1,
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: 'top 75%',
-          toggleActions: 'play none none reverse',
-        },
-      }
-    );
-  }, []);
+  const categories = ['All', 'AI/ML', 'Frontend', 'Utility'];
+
+  const filteredProjects = projects.filter((p) => {
+    if (selectedCategory !== 'All' && p.category !== selectedCategory) return false;
+    return true;
+  });
 
   return (
-    <section
-      id="projects"
-      ref={sectionRef}
-      className="journey-section"
-      style={{ minHeight: '100vh', padding: '6rem 0' }}
-    >
-      <div className="section-content">
-        <div ref={titleRef} style={{ marginBottom: '4rem', textAlign: 'center' }}>
-          <span className="text-label">Elevation III</span>
-          <h2 className="heading-section" style={{
-            marginTop: '0.5rem',
-            background: 'linear-gradient(180deg, var(--text-primary) 0%, var(--fog-gray) 100%)',
-            WebkitBackgroundClip: 'text',
-            backgroundClip: 'text',
-            color: 'transparent',
-          }}>
-            Mountain Portals
-          </h2>
+    <section id="projects" className="section">
+      <div className="container">
+        {/* Section Header */}
+        <div className="section-header reveal" ref={headerRef}>
+          <span className="text-label">Engineering Case Studies</span>
+          <h2 className="heading-section">Featured Systems & Projects</h2>
+          <p className="text-body">
+            Production-grade systems, computer vision models, and full-stack software built for performance and scale.
+          </p>
         </div>
 
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-          gap: '2rem',
-        }}>
-          {projects.map((project, i) => (
-            <ProjectPortal key={i} project={project} index={i} />
+        {/* Category Filter */}
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: 'var(--space-xs)',
+            flexWrap: 'wrap',
+            marginBottom: 'var(--space-2xl)',
+          }}
+        >
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              className={`tag${selectedCategory === cat ? ' active' : ''}`}
+              onClick={() => setSelectedCategory(cat)}
+              style={{
+                cursor: 'pointer',
+                borderColor: selectedCategory === cat ? 'var(--accent)' : 'var(--border)',
+                background: selectedCategory === cat ? 'var(--accent-subtle)' : 'var(--bg-tertiary)',
+                color: selectedCategory === cat ? 'var(--accent)' : 'var(--text-secondary)',
+              }}
+            >
+              {cat}
+            </button>
           ))}
         </div>
+
+        {/* Project Cards Grid */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+            gap: 'var(--space-xl)',
+            maxWidth: '1100px',
+            margin: '0 auto',
+          }}
+        >
+          {filteredProjects.map((project, index) => {
+            const isHighlighted = selectedTech && project.tags.some(
+              (tag) => tag.toLowerCase().includes(selectedTech.toLowerCase()) || selectedTech.toLowerCase().includes(tag.toLowerCase())
+            );
+
+            return (
+              <div
+                key={index}
+                data-cursor="project"
+                onClick={() => setActiveModalProject(project)}
+                className="card project-card-interactive"
+                style={{
+                  padding: 'var(--space-xl)',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  border: isHighlighted ? '1.5px solid var(--accent)' : '1px solid var(--border)',
+                  boxShadow: isHighlighted ? '0 0 24px var(--accent-glow)' : 'var(--shadow-md)',
+                  transition: 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, box-shadow 0.2s ease',
+                  position: 'relative',
+                  overflow: 'hidden',
+                }}
+              >
+                {/* Active filter highlight badge */}
+                {isHighlighted && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: '12px',
+                      right: '12px',
+                      background: 'var(--accent)',
+                      color: '#ffffff',
+                      fontSize: '0.65rem',
+                      fontFamily: 'var(--font-mono)',
+                      padding: '2px 8px',
+                      borderRadius: '4px',
+                      fontWeight: 600,
+                    }}
+                  >
+                    MATCHES: {selectedTech}
+                  </div>
+                )}
+
+                <div>
+                  {/* Category & Badge */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 'var(--space-md)' }}>
+                    <span className="badge">{project.category}</span>
+                    {project.featured && (
+                      <span className="badge" style={{ background: 'rgba(34, 197, 94, 0.1)', color: 'var(--success)' }}>
+                        ★ Featured
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Title & Subtitle */}
+                  <h3
+                    style={{
+                      fontSize: '1.35rem',
+                      fontFamily: 'var(--font-display)',
+                      fontWeight: 700,
+                      color: 'var(--text-primary)',
+                      marginBottom: '4px',
+                      lineHeight: 1.3,
+                    }}
+                  >
+                    {project.title}
+                  </h3>
+                  <p className="text-mono" style={{ color: 'var(--accent)', fontSize: '0.78rem', marginBottom: 'var(--space-md)' }}>
+                    {project.subtitle}
+                  </p>
+
+                  {/* Description */}
+                  <p className="text-body" style={{ fontSize: '0.9rem', lineHeight: 1.6, marginBottom: 'var(--space-lg)' }}>
+                    {project.description}
+                  </p>
+                </div>
+
+                <div>
+                  {/* Tech stack badges */}
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: 'var(--space-lg)' }}>
+                    {project.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="tag"
+                        style={{
+                          fontSize: '0.7rem',
+                          background: selectedTech && tag.toLowerCase().includes(selectedTech.toLowerCase()) ? 'var(--accent-subtle)' : undefined,
+                          borderColor: selectedTech && tag.toLowerCase().includes(selectedTech.toLowerCase()) ? 'var(--accent)' : undefined,
+                        }}
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* Open Case Study prompt CTA */}
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      paddingTop: 'var(--space-sm)',
+                      borderTop: '1px solid var(--border)',
+                      fontSize: '0.82rem',
+                      color: 'var(--accent-light)',
+                      fontWeight: 600,
+                    }}
+                  >
+                    <span>Inspect Architecture & Case Study</span>
+                    <span style={{ fontSize: '1.1rem' }}>➔</span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
+
+      {/* Case Study Deep-Dive Modal */}
+      {activeModalProject && (
+        <ProjectModal
+          project={activeModalProject}
+          onClose={() => setActiveModalProject(null)}
+        />
+      )}
     </section>
   );
 };

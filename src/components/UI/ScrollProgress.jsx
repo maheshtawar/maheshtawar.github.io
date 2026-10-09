@@ -1,45 +1,40 @@
-import React, { useEffect, useRef, useState } from 'react';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
-gsap.registerPlugin(ScrollTrigger);
+import { useEffect, useState } from 'react';
 
 const ScrollProgress = () => {
   const [progress, setProgress] = useState(0);
-  const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    ScrollTrigger.create({
-      trigger: document.documentElement,
-      start: 'top top',
-      end: 'bottom bottom',
-      onUpdate: (self) => {
-        setProgress(self.progress);
-        setVisible(self.progress > 0.05 && self.progress < 0.98);
-      },
-    });
+    const handleScroll = () => {
+      const totalScroll = document.documentElement.scrollHeight - window.innerHeight;
+      if (totalScroll > 0) {
+        setProgress((window.scrollY / totalScroll) * 100);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   return (
     <div
-      className="scroll-progress"
+      role="progressbar"
+      aria-label="Scroll progress"
+      aria-valuenow={Math.round(progress)}
+      aria-valuemin={0}
+      aria-valuemax={100}
       style={{
-        opacity: visible ? 0.7 : 0,
-        transition: 'opacity 0.5s var(--ease-out)',
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: `${progress}%`,
+        height: '3px',
+        background: 'linear-gradient(90deg, var(--accent), #818cf8, #38bdf8)',
+        zIndex: 10001,
+        boxShadow: '0 0 10px var(--accent-glow)',
         pointerEvents: 'none',
+        transition: 'width 0.1s ease-out',
       }}
-    >
-      <span className="scroll-progress-label">Base</span>
-
-      <div className="scroll-progress-bar">
-        <div
-          className="scroll-progress-fill"
-          style={{ height: `${progress * 100}%` }}
-        />
-      </div>
-
-      <span className="scroll-progress-label">Summit</span>
-    </div>
+    />
   );
 };
 

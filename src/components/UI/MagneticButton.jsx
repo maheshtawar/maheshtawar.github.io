@@ -1,125 +1,96 @@
-import React, { useRef } from 'react';
-import anime from 'animejs/lib/anime.es.js';
+import { useRef, useEffect } from 'react';
 
-const MagneticButton = ({ children, onClick, variant = 'primary', icon, className = '', ...props }) => {
-  const btnRef = useRef(null);
-  const rippleRef = useRef(null);
+const MagneticButton = ({
+  children,
+  onClick,
+  className = '',
+  style = {},
+  strength = 0.25,
+  as = 'button',
+  ...props
+}) => {
+  const Component = as;
+  const buttonRef = useRef(null);
 
-  const handleMouseMove = (e) => {
-    const btn = btnRef.current;
-    if (!btn) return;
-    const rect = btn.getBoundingClientRect();
-    const x = e.clientX - rect.left - rect.width / 2;
-    const y = e.clientY - rect.top - rect.height / 2;
+  useEffect(() => {
+    const el = buttonRef.current;
+    if (!el) return;
 
-    anime({
-      targets: btn,
-      translateX: x * 0.3,
-      translateY: y * 0.3,
-      duration: 400,
-      easing: 'easeOutExpo',
-    });
-  };
+    // Skip on touch screens or if reduced motion is requested
+    const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (isTouch || prefersReducedMotion) return;
 
-  const handleMouseLeave = () => {
-    anime({
-      targets: btnRef.current,
-      translateX: 0,
-      translateY: 0,
-      duration: 600,
-      easing: 'easeOutElastic(1, 0.5)',
-    });
-  };
+    let targetX = 0;
+    let targetY = 0;
+    let currentX = 0;
+    let currentY = 0;
+    let animId = null;
+    let isHovering = false;
 
-  const handleClick = (e) => {
-    // Ripple effect
-    const btn = btnRef.current;
-    const rect = btn.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const lerp = (a, b, n) => (1 - n) * a + n * b;
 
-    const ripple = document.createElement('span');
-    ripple.style.cssText = `
-      position: absolute;
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.4);
-      left: ${x}px;
-      top: ${y}px;
-      transform: translate(-50%, -50%) scale(0);
-      pointer-events: none;
-    `;
-    btn.appendChild(ripple);
+    const render = () => {
+      currentX = lerp(currentX, targetX, 0.18);
+      currentY = lerp(currentY, targetY, 0.18);
 
-    anime({
-      targets: ripple,
-      scale: [0, 4],
-      opacity: [0.4, 0],
-      duration: 600,
-      easing: 'easeOutExpo',
-      complete: () => ripple.remove(),
-    });
+      if (el) {
+        el.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
+      }
 
-    onClick?.(e);
-  };
+      if (isHovering || Math.abs(targetX - currentX) > 0.05 || Math.abs(targetY - currentY) > 0.05) {
+        animId = requestAnimationFrame(render);
+      } else {
+        el.style.transform = 'translate3d(0, 0, 0)';
+      }
+    };
 
-  const isPrimary = variant === 'primary';
+    const handleMouseMove = (e) => {
+      const rect = el.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      const deltaX = e.clientX - centerX;
+      const deltaY = e.clientY - centerY;
+
+      targetX = deltaX * strength;
+      targetY = deltaY * strength;
+
+      if (!isHovering) {
+        isHovering = true;
+        animId = requestAnimationFrame(render);
+      }
+    };
+
+    const handleMouseLeave = () => {
+      isHovering = false;
+      targetX = 0;
+      targetY = 0;
+    };
+
+    el.addEventListener('mousemove', handleMouseMove);
+    el.addEventListener('mouseleave', handleMouseLeave);
+
+    return () => {
+      el.removeEventListener('mousemove', handleMouseMove);
+      el.removeEventListener('mouseleave', handleMouseLeave);
+      if (animId) cancelAnimationFrame(animId);
+    };
+  }, [strength]);
 
   return (
-    <button
-      ref={btnRef}
+    <Component
+      ref={buttonRef}
       className={`magnetic-btn ${className}`}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      onClick={handleClick}
+      onClick={onClick}
       style={{
-        position: 'relative',
-        overflow: 'hidden',
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: '0.5rem',
-        padding: '0.8rem 1.8rem',
-        fontFamily: 'var(--font-display)',
-        fontSize: '0.95rem',
-        fontWeight: 600,
-        letterSpacing: '0.02em',
-        border: isPrimary ? 'none' : '1.5px solid rgba(124,58,237,0.4)',
-        borderRadius: '12px',
-        color: isPrimary ? '#fff' : 'var(--primary-light)',
-        background: isPrimary
-          ? 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 50%, #22d3ee 150%)'
-          : 'rgba(124,58,237,0.08)',
-        backgroundSize: '200% 200%',
-        transition: 'box-shadow 0.3s ease, border-color 0.3s ease, background-position 0.5s ease',
+        ...style,
         willChange: 'transform',
-        ...props.style,
-      }}
-      onMouseEnter={(e) => {
-        anime({
-          targets: e.currentTarget,
-          backgroundPosition: ['0% 0%', '100% 100%'],
-          duration: 500,
-          easing: 'easeOutExpo',
-        });
-        e.currentTarget.style.boxShadow = isPrimary
-          ? '0 8px 30px rgba(124,58,237,0.4), 0 0 50px rgba(124,58,237,0.15)'
-          : '0 0 30px rgba(124,58,237,0.2)';
-        if (!isPrimary) {
-          e.currentTarget.style.borderColor = 'rgba(124,58,237,0.6)';
-        }
-      }}
-      onMouseOut={(e) => {
-        e.currentTarget.style.boxShadow = 'none';
-        if (!isPrimary) {
-          e.currentTarget.style.borderColor = 'rgba(124,58,237,0.4)';
-        }
+        transition: 'box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease',
       }}
       {...props}
     >
-      {icon && <i className={`pi ${icon}`} style={{ fontSize: '1rem' }} />}
       {children}
-    </button>
+    </Component>
   );
 };
 

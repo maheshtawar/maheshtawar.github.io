@@ -1,46 +1,31 @@
-import React, { useEffect, useRef, useState } from 'react';
-import anime from 'animejs/lib/anime.es.js';
-import { personalInfo } from '../../data/profile';
+import { useState, useEffect, useRef } from 'react';
+import { personalInfo, navItems } from '../../data/profile';
+import { useTheme } from '../../context/ThemeContext';
+import { usePortfolio } from '../../context/PortfolioContext';
 
 const Navbar = () => {
+  const { theme, toggleTheme } = useTheme();
+  const { selectedTech, clearTechFilter, setIsCommandPaletteOpen } = usePortfolio();
   const [scrolled, setScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState('hero');
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [hidden, setHidden] = useState(false);
   const lastScrollY = useRef(0);
-  const indicatorRef = useRef(null);
-
-  const navItems = [
-    { id: 'hero', label: 'Home', icon: 'pi-home' },
-    { id: 'skills', label: 'Skills', icon: 'pi-cog' },
-    { id: 'projects', label: 'Projects', icon: 'pi-briefcase' },
-    { id: 'experience', label: 'Experience', icon: 'pi-history' },
-    { id: 'certificates', label: 'Certificates', icon: 'pi-verified' },
-    { id: 'contact', label: 'Contact', icon: 'pi-envelope' },
-  ];
 
   useEffect(() => {
     const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-
-      // Scrolled state (blur background)
-      setScrolled(currentScrollY > 50);
-
-      // Hide/show on scroll direction
-      if (currentScrollY > lastScrollY.current && currentScrollY > 200) {
-        setHidden(true);
-      } else {
-        setHidden(false);
-      }
-      lastScrollY.current = currentScrollY;
+      const currentY = window.scrollY;
+      setScrolled(currentY > 40);
+      lastScrollY.current = currentY;
 
       // Active section detection
-      const sections = navItems.map(item => document.getElementById(item.id)).filter(Boolean);
-      for (let i = sections.length - 1; i >= 0; i--) {
-        const rect = sections[i].getBoundingClientRect();
-        if (rect.top <= 150) {
-          setActiveSection(navItems[i].id);
-          break;
+      for (let i = navItems.length - 1; i >= 0; i--) {
+        const el = document.getElementById(navItems[i].id);
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          if (rect.top <= 140) {
+            setActiveSection(navItems[i].id);
+            break;
+          }
         }
       }
     };
@@ -49,215 +34,189 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const scrollToSection = (id) => {
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    document.body.style.overflow = mobileOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [mobileOpen]);
+
+  const scrollTo = (id) => {
     const el = document.getElementById(id);
     if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
       setMobileOpen(false);
     }
   };
 
-  // Mobile menu animation
-  useEffect(() => {
-    if (mobileOpen) {
-      anime({
-        targets: '.mobile-nav-item',
-        translateX: [-40, 0],
-        opacity: [0, 1],
-        delay: anime.stagger(60),
-        duration: 500,
-        easing: 'easeOutExpo',
-      });
-    }
-  }, [mobileOpen]);
-
   return (
     <>
-      <nav
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 1000,
-          padding: scrolled ? '0.6rem 2rem' : '1rem 2rem',
-          background: scrolled ? 'rgba(6, 9, 24, 0.85)' : 'transparent',
-          backdropFilter: scrolled ? 'blur(20px)' : 'none',
-          WebkitBackdropFilter: scrolled ? 'blur(20px)' : 'none',
-          borderBottom: scrolled ? '1px solid rgba(148, 163, 184, 0.06)' : '1px solid transparent',
-          transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
-          transform: hidden ? 'translateY(-100%)' : 'translateY(0)',
-        }}
-      >
-        <div style={{
-          maxWidth: '1200px',
-          margin: '0 auto',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}>
+      <nav className={`navbar${scrolled ? ' scrolled' : ''}`} role="navigation" aria-label="Main navigation">
+        <div className="navbar-inner">
           {/* Logo */}
-          <div
-            onClick={() => scrollToSection('hero')}
-            style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: '1.4rem',
-              fontWeight: 700,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '2px',
-            }}
-          >
-            <span style={{ color: 'var(--text-primary)' }}>{personalInfo.firstName}</span>
-            <span style={{
-              background: 'var(--gradient-primary)',
-              WebkitBackgroundClip: 'text',
-              backgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-            }}>.dev</span>
-          </div>
+          <button className="nav-logo" onClick={() => scrollTo('hero')} aria-label="Go to top">
+            <span>{personalInfo.firstName}</span>
+            <span className="nav-logo-accent">.dev</span>
+          </button>
 
-          {/* Desktop Nav Links */}
-          <div className="nav-links-desktop" style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-          }}>
+          {/* Active Global Technology Filter Indicator */}
+          {selectedTech && (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '3px 10px',
+                borderRadius: '9999px',
+                background: 'var(--accent-subtle)',
+                border: '1px solid var(--accent)',
+                fontSize: '0.72rem',
+                fontFamily: 'var(--font-mono)',
+                color: 'var(--accent-light)',
+              }}
+            >
+              <span>⚡ {selectedTech}</span>
+              <button
+                onClick={clearTechFilter}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: 'var(--text-muted)',
+                  cursor: 'pointer',
+                  fontWeight: 'bold',
+                  padding: 0,
+                  marginLeft: '4px',
+                }}
+                title="Clear technology filter"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+
+          {/* Desktop Navigation Links */}
+          <div className="nav-links">
             {navItems.map((item) => (
               <button
                 key={item.id}
-                onClick={() => scrollToSection(item.id)}
-                style={{
-                  background: activeSection === item.id ? 'rgba(124,58,237,0.12)' : 'transparent',
-                  border: 'none',
-                  color: activeSection === item.id ? 'var(--primary-light)' : 'var(--text-secondary)',
-                  padding: '0.5rem 1rem',
-                  borderRadius: '8px',
-                  fontFamily: 'var(--font-body)',
-                  fontSize: '0.875rem',
-                  fontWeight: 500,
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  position: 'relative',
-                }}
-                onMouseEnter={(e) => {
-                  if (activeSection !== item.id) {
-                    e.currentTarget.style.color = 'var(--text-primary)';
-                    e.currentTarget.style.background = 'rgba(148,163,184,0.06)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (activeSection !== item.id) {
-                    e.currentTarget.style.color = 'var(--text-secondary)';
-                    e.currentTarget.style.background = 'transparent';
-                  }
-                }}
+                className={`nav-link${activeSection === item.id ? ' active' : ''}`}
+                onClick={() => scrollTo(item.id)}
+                aria-label={`Go to ${item.label}`}
               >
                 {item.label}
               </button>
             ))}
           </div>
 
-          {/* Social + Mobile Toggle */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <a href={personalInfo.social.github} target="_blank" rel="noopener noreferrer"
-              className="nav-social-link"
+          {/* Action Tools */}
+          <div className="nav-actions">
+            {/* Command Palette Trigger Button */}
+            <button
+              onClick={() => setIsCommandPaletteOpen(true)}
+              className="text-mono"
+              aria-label="Open command palette"
+              title="Open Command Palette (⌘K or /)"
               style={{
-                width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                borderRadius: '8px', color: 'var(--text-secondary)', transition: 'all 0.3s ease',
-                background: 'transparent',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '5px 10px',
+                background: 'var(--bg-tertiary)',
+                border: '1px solid var(--border)',
+                borderRadius: 'var(--radius-sm)',
+                color: 'var(--text-secondary)',
+                fontSize: '0.72rem',
+                cursor: 'pointer',
+                transition: 'all var(--duration-fast) ease',
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text-primary)'; e.currentTarget.style.background = 'rgba(148,163,184,0.08)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)'; e.currentTarget.style.background = 'transparent'; }}
             >
-              <i className="pi pi-github" style={{ fontSize: '1.1rem' }} />
-            </a>
-            <a href={personalInfo.social.linkedin} target="_blank" rel="noopener noreferrer"
-              className="nav-social-link"
-              style={{
-                width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                borderRadius: '8px', color: 'var(--text-secondary)', transition: 'all 0.3s ease',
-                background: 'transparent',
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text-primary)'; e.currentTarget.style.background = 'rgba(148,163,184,0.08)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)'; e.currentTarget.style.background = 'transparent'; }}
+              <span>⌘K</span>
+              <span className="visually-hidden">Open Command Center</span>
+            </button>
+
+            {/* Theme toggle */}
+            <button
+              className="theme-toggle"
+              onClick={toggleTheme}
+              aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+              title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
             >
-              <i className="pi pi-linkedin" style={{ fontSize: '1.1rem' }} />
+              {theme === 'dark' ? '☀️' : '🌙'}
+            </button>
+
+            {/* Social links */}
+            <a href={personalInfo.social.github} target="_blank" rel="noopener noreferrer" className="btn-icon" aria-label="GitHub profile">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+              </svg>
             </a>
 
-            {/* Mobile Hamburger */}
-            <button
-              className="mobile-toggle"
-              onClick={() => setMobileOpen(!mobileOpen)}
-              style={{
-                display: 'none',
-                background: 'none',
-                border: 'none',
-                color: 'var(--text-primary)',
-                fontSize: '1.5rem',
-                cursor: 'pointer',
-                padding: '0.25rem',
-              }}
+            <a href={personalInfo.social.linkedin} target="_blank" rel="noopener noreferrer" className="btn-icon" aria-label="LinkedIn profile">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+              </svg>
+            </a>
+
+            {/* Resume CTA (Desktop) */}
+            <a
+              href={personalInfo.resume}
+              download="Mahesh_Tawar.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="nav-resume-btn"
             >
-              <i className={`pi ${mobileOpen ? 'pi-times' : 'pi-bars'}`} />
+              Resume ↗
+            </a>
+
+            {/* Mobile Toggle */}
+            <button
+              className={`nav-toggle${mobileOpen ? ' open' : ''}`}
+              onClick={() => setMobileOpen(!mobileOpen)}
+              aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={mobileOpen}
+            >
+              <span className="nav-toggle-bar" />
             </button>
           </div>
         </div>
       </nav>
 
-      {/* Mobile Menu Overlay */}
-      {mobileOpen && (
-        <div
-          className="mobile-nav-overlay"
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 999,
-            background: 'rgba(6, 9, 24, 0.95)',
-            backdropFilter: 'blur(30px)',
-            WebkitBackdropFilter: 'blur(30px)',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '1rem',
-          }}
-        >
-          {navItems.map((item) => (
-            <button
-              key={item.id}
-              className="mobile-nav-item"
-              onClick={() => scrollToSection(item.id)}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: activeSection === item.id ? 'var(--primary-light)' : 'var(--text-primary)',
-                fontFamily: 'var(--font-display)',
-                fontSize: '1.5rem',
-                fontWeight: 600,
-                padding: '0.75rem 2rem',
-                cursor: 'pointer',
-                opacity: 0,
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.75rem',
-              }}
-            >
-              <i className={`pi ${item.icon}`} style={{ fontSize: '1.2rem', color: 'var(--accent)' }} />
-              {item.label}
-            </button>
-          ))}
+      {/* Mobile Nav Overlay */}
+      <div className={`mobile-nav${mobileOpen ? ' open' : ''}`} role="dialog" aria-modal="true">
+        {navItems.map((item) => (
+          <button
+            key={item.id}
+            className={`mobile-nav-link${activeSection === item.id ? ' active' : ''}`}
+            onClick={() => scrollTo(item.id)}
+          >
+            {item.label}
+          </button>
+        ))}
+        <div style={{ marginTop: '1.5rem', display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <button
+            onClick={() => {
+              setMobileOpen(false);
+              setIsCommandPaletteOpen(true);
+            }}
+            className="btn btn-secondary"
+            style={{ fontSize: '0.8rem' }}
+          >
+            ⌘K Command Center
+          </button>
+          <a
+            href={personalInfo.resume}
+            download="Mahesh_Tawar.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-primary"
+            style={{ fontSize: '0.8rem' }}
+          >
+            Resume ↗
+          </a>
+          <button className="theme-toggle" onClick={toggleTheme} aria-label="Toggle theme">
+            {theme === 'dark' ? '☀️' : '🌙'}
+          </button>
         </div>
-      )}
-
-      <style>{`
-        @media (max-width: 768px) {
-          .nav-links-desktop { display: none !important; }
-          .nav-social-link { display: none !important; }
-          .mobile-toggle { display: flex !important; }
-        }
-      `}</style>
+      </div>
     </>
   );
 };

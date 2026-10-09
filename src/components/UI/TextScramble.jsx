@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-const TextScramble = ({ text, trigger = true, className = '', as: Tag = 'span', ...props }) => {
+const TextScramble = ({ text, trigger = true, className = '', as = 'span', ...props }) => {
+  const Tag = as;
   const elRef = useRef(null);
   const [displayText, setDisplayText] = useState('');
   const chars = '!<>-_\\/[]{}—=+*^?#________';

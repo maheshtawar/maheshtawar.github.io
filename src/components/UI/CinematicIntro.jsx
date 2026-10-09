@@ -2,7 +2,6 @@ import React, { useEffect, useRef } from 'react';
 import anime from 'animejs/lib/anime.es.js';
 
 const CinematicIntro = ({ onComplete }) => {
-  const containerRef = useRef(null);
   const imageRef = useRef(null);
   const overlayRef = useRef(null);
 

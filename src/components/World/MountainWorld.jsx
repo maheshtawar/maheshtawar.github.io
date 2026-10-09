@@ -9,7 +9,6 @@ gsap.registerPlugin(ScrollTrigger);
    ============================================ */
 function generateMountainPath(peaks, width, baseY, seed = 0) {
   const points = [];
-  const segmentWidth = width / (peaks * 2);
   
   for (let i = 0; i <= peaks * 2; i++) {
     const x = (i / (peaks * 2)) * width;
@@ -206,21 +205,24 @@ const SkyGradient = () => {
 /* ============================================
    Stars
    ============================================ */
-const Stars = () => {
-  const stars = useMemo(() => {
-    return Array.from({ length: 100 }, (_, i) => ({
-      id: i,
-      left: `${Math.random() * 100}%`,
-      top: `${Math.random() * 50}%`,
-      size: Math.random() * 2 + 0.5,
-      delay: Math.random() * 3,
-      duration: Math.random() * 2 + 2,
-    }));
-  }, []);
+const STARS_DATA = Array.from({ length: 100 }, (_, i) => {
+  const pseudo1 = ((i * 1234567 + 89) % 1000) / 1000;
+  const pseudo2 = ((i * 7654321 + 43) % 1000) / 1000;
+  const pseudo3 = ((i * 3456789 + 17) % 1000) / 1000;
+  return {
+    id: i,
+    left: `${pseudo1 * 100}%`,
+    top: `${pseudo2 * 50}%`,
+    size: pseudo3 * 2 + 0.5,
+    delay: pseudo1 * 3,
+    duration: pseudo2 * 2 + 2,
+  };
+});
 
+const Stars = () => {
   return (
     <div style={{ position: 'absolute', inset: 0, zIndex: 1 }}>
-      {stars.map(star => (
+      {STARS_DATA.map(star => (
         <div key={star.id} style={{
           position: 'absolute',
           left: star.left,

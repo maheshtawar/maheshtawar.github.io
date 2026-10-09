@@ -80,7 +80,7 @@ const Keyboard = () => {
 /* ============================================
    Google Search Sequence (Pure DOM Component)
    ============================================ */
-const GoogleSequence = ({ googleRefs }) => {
+const GoogleSequence = ({ onRegisterRef }) => {
   return (
     <div style={{
       width: '100%', height: '100%',
@@ -104,13 +104,13 @@ const GoogleSequence = ({ googleRefs }) => {
           fontSize: '14px', border: '1px solid #1f2937',
         }}>
           <span style={{ color: '#6b7280', marginRight: '8px' }}>https://</span>
-          <span ref={(el) => { if (googleRefs) googleRefs.url = el; }} style={{ color: '#fff' }}>google.com</span>
+          <span ref={(el) => onRegisterRef?.('url', el)} style={{ color: '#fff' }}>google.com</span>
         </div>
       </div>
 
       <div style={{ flex: 1, position: 'relative' }}>
         {/* Google Home */}
-        <div ref={(el) => { if (googleRefs) googleRefs.home = el; }} style={{
+        <div ref={(el) => onRegisterRef?.('home', el)} style={{
           position: 'absolute', inset: 0,
           display: 'flex', flexDirection: 'column', alignItems: 'center',
           backgroundColor: '#fff', opacity: 1, zIndex: 5,
@@ -133,8 +133,8 @@ const GoogleSequence = ({ googleRefs }) => {
               <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
             </svg>
             <span style={{ marginLeft: '14px', fontSize: '16px', color: '#202124', display: 'flex', alignItems: 'center' }}>
-              <span ref={(el) => { if (googleRefs) googleRefs.type = el; }}></span>
-              <span ref={(el) => { if (googleRefs) googleRefs.blink = el; }} style={{
+              <span ref={(el) => onRegisterRef?.('type', el)}></span>
+              <span ref={(el) => onRegisterRef?.('blink', el)} style={{
                 display: 'inline-block', width: '2px', height: '20px',
                 backgroundColor: '#202124', marginLeft: '3px',
                 animation: 'blink 1s step-end infinite',
@@ -144,7 +144,7 @@ const GoogleSequence = ({ googleRefs }) => {
         </div>
 
         {/* Search Results */}
-        <div ref={(el) => { if (googleRefs) googleRefs.results = el; }} style={{
+        <div ref={(el) => onRegisterRef?.('results', el)} style={{
           position: 'absolute', inset: 0, backgroundColor: '#fff', zIndex: 10, opacity: 0,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', padding: '12px 18px', borderBottom: '1px solid #ebebeb' }}>
@@ -207,7 +207,7 @@ const GoogleSequence = ({ googleRefs }) => {
 
         {/* Website iframe */}
         <iframe
-          ref={(el) => { if (googleRefs) googleRefs.iframe = el; }}
+          ref={(el) => onRegisterRef?.('iframe', el)}
           src="?skipIntro=true"
           title="Portfolio Preview"
           style={{
@@ -221,7 +221,7 @@ const GoogleSequence = ({ googleRefs }) => {
         />
 
         {/* Mouse Cursor */}
-        <div ref={(el) => { if (googleRefs) googleRefs.cursor = el; }} style={{
+        <div ref={(el) => onRegisterRef?.('cursor', el)} style={{
           position: 'absolute', left: 0, top: 0,
           width: '28px', height: '28px', zIndex: 999,
           pointerEvents: 'none', opacity: 0,
@@ -254,9 +254,10 @@ const Scene = ({ scrollProgress }) => {
     url: null,
     type: null,
     blink: null,
-  }).current;
+  });
 
   useFrame((state) => {
+    const gRefs = googleRefs.current;
     const p = scrollProgress.current; // 0..1 across the laptop section
 
     // ---- Camera ----
@@ -342,24 +343,24 @@ const Scene = ({ scrollProgress }) => {
     // Phase 1: Type "Mahesh Tawar" (gp: 0 → 0.35)
     const typeProgress = Math.min(1, gp / 0.35);
     const chars = Math.floor(typeProgress * 12);
-    if (googleRefs.type) {
-      googleRefs.type.textContent = 'Mahesh Tawar'.substring(0, chars);
+    if (gRefs.type) {
+      gRefs.type.textContent = 'Mahesh Tawar'.substring(0, chars);
     }
-    if (googleRefs.blink) {
-      googleRefs.blink.style.opacity = gp < 0.35 ? '1' : '0';
+    if (gRefs.blink) {
+      gRefs.blink.style.opacity = gp < 0.35 ? '1' : '0';
     }
 
     // Phase 2: Show results (gp: 0.35 → 0.5)
-    if (googleRefs.home) {
-      googleRefs.home.style.opacity = gp < 0.35 ? '1' : '0';
-      googleRefs.home.style.pointerEvents = gp < 0.35 ? 'auto' : 'none';
+    if (gRefs.home) {
+      gRefs.home.style.opacity = gp < 0.35 ? '1' : '0';
+      gRefs.home.style.pointerEvents = gp < 0.35 ? 'auto' : 'none';
     }
-    if (googleRefs.results) {
-      googleRefs.results.style.opacity = gp >= 0.35 && gp < 0.72 ? '1' : '0';
+    if (gRefs.results) {
+      gRefs.results.style.opacity = gp >= 0.35 && gp < 0.72 ? '1' : '0';
     }
 
     // Phase 3: Move cursor to result link and simulate click (gp: 0.48 → 0.72)
-    if (googleRefs.cursor) {
+    if (gRefs.cursor) {
       const cursorOpacity = gp > 0.15 && gp < 0.8 ? 1 : 0;
       let cursorX = 420;
       let cursorY = 260;
@@ -368,16 +369,16 @@ const Scene = ({ scrollProgress }) => {
         cursorX = lerp(420, 160, Math.min(1, ct * 1.5));
         cursorY = lerp(260, 140, Math.min(1, ct * 1.5));
       }
-      googleRefs.cursor.style.opacity = cursorOpacity;
-      googleRefs.cursor.style.transform = `translate(${cursorX}px, ${cursorY}px)`;
+      gRefs.cursor.style.opacity = cursorOpacity;
+      gRefs.cursor.style.transform = `translate(${cursorX}px, ${cursorY}px)`;
     }
 
     // Phase 4: Show website inside laptop screen (gp: 0.72 → 1)
-    if (googleRefs.iframe) {
-      googleRefs.iframe.style.opacity = gp >= 0.72 ? '1' : '0';
+    if (gRefs.iframe) {
+      gRefs.iframe.style.opacity = gp >= 0.72 ? '1' : '0';
     }
-    if (googleRefs.url) {
-      googleRefs.url.textContent = gp >= 0.72 ? 'maheshtawar.github.io' : 'google.com';
+    if (gRefs.url) {
+      gRefs.url.textContent = gp >= 0.72 ? 'maheshtawar.github.io' : 'google.com';
     }
   });
 
@@ -485,7 +486,7 @@ const Scene = ({ scrollProgress }) => {
                   borderRadius: '6px',
                 }}
               >
-                <GoogleSequence googleRefs={googleRefs} />
+                <GoogleSequence onRegisterRef={(key, el) => { googleRefs.current[key] = el; }} />
               </div>
             </Html>
           )}

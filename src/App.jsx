@@ -3,25 +3,35 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
 import { personalInfo } from './data/profile';
-import LaptopIntro from './components/UI/LaptopIntro';
-import MountainWorld from './components/World/MountainWorld';
-import MountainNav from './components/UI/MountainNav';
-import ScrollProgress from './components/UI/ScrollProgress';
+import { ThemeProvider } from './context/ThemeContext';
+import { PortfolioProvider } from './context/PortfolioContext';
+import Navbar from './components/Layout/Navbar';
+import Footer from './components/Layout/Footer';
 import Hero from './components/Sections/Hero';
+import About from './components/Sections/About';
 import Skills from './components/Sections/Skills';
 import Experience from './components/Sections/Experience';
+import HowIBuild from './components/Sections/HowIBuild';
 import Projects from './components/Sections/Projects';
+import Certifications from './components/Sections/Certifications';
+import Terminal from './components/Sections/Terminal';
 import Contact from './components/Sections/Contact';
+import ScrollProgress from './components/UI/ScrollProgress';
+import CustomCursor from './components/UI/CustomCursor';
+import BackgroundParticles from './components/UI/BackgroundParticles';
+import CommandPalette from './components/UI/CommandPalette';
+import Toast from './components/UI/Toast';
+import QuickLoader from './components/UI/QuickLoader';
 import './index.css';
 
 gsap.registerPlugin(ScrollTrigger);
 
-function App() {
+function PortfolioApp() {
   useEffect(() => {
     // Dynamic document title
-    document.title = `${personalInfo.fullName} — Java Backend Developer & Full Stack Engineer`;
+    document.title = `${personalInfo.fullName} — Java Backend Developer & Secure Systems Architect`;
 
-    // Meta description
+    // Dynamic meta description
     let meta = document.querySelector('meta[name="description"]');
     if (!meta) {
       meta = document.createElement('meta');
@@ -30,69 +40,85 @@ function App() {
     }
     meta.content = personalInfo.bio;
 
-    // Lenis smooth scroll
+    // Respect user's reduced-motion preference
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) return;
+
+    // Smooth scroll with Lenis
     const lenis = new Lenis({
-      duration: 1.2,
+      duration: 1.1,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       smoothWheel: true,
-      wheelMultiplier: 0.8,
+      wheelMultiplier: 0.9,
     });
 
-    // Sync Lenis with GSAP ticker
+    // Synchronize Lenis with GSAP ScrollTrigger
     lenis.on('scroll', ScrollTrigger.update);
-    gsap.ticker.add((time) => {
+    const tickHandler = (time) => {
       lenis.raf(time * 1000);
-    });
+    };
+    gsap.ticker.add(tickHandler);
     gsap.ticker.lagSmoothing(0);
 
     return () => {
       lenis.destroy();
-      gsap.ticker.remove(lenis.raf);
-      ScrollTrigger.getAll().forEach(t => t.kill());
+      gsap.ticker.remove(tickHandler);
+      ScrollTrigger.getAll().forEach((t) => t.kill());
     };
   }, []);
 
   return (
-    <div className="journey-container">
-      {/* Fixed mountain background */}
-      <MountainWorld />
+    <div className="portfolio-wrapper" style={{ position: 'relative', minHeight: '100vh' }}>
+      {/* Short Developer Boot Loader */}
+      <QuickLoader />
 
-      {/* Fixed UI overlays */}
-      <MountainNav />
+      {/* Global Interactive Command Center (⌘K / /) */}
+      <CommandPalette />
+
+      {/* Floating Notification Toast */}
+      <Toast />
+
+      {/* Reading Progress Indicator */}
       <ScrollProgress />
 
-      {/* Scrollable content */}
-      <div className="journey-content">
-        {/* Phase 1: Laptop Intro (scroll-driven, 400vh) */}
-        <LaptopIntro />
+      {/* Desktop Magnetic & Contextual Custom Cursor */}
+      <CustomCursor />
 
-        {/* Phase 2: Mountain world sections */}
-        <div style={{ position: 'relative', zIndex: 15 }}>
-          <Hero />
-          <Skills />
-          <Experience />
-          <Projects />
-          <Contact />
-        </div>
+      {/* Background Interactive Particle Canvas */}
+      <BackgroundParticles />
 
-        {/* Footer */}
-        <footer style={{
-          position: 'relative',
-          zIndex: 15,
-          textAlign: 'center',
-          padding: '2rem',
-          borderTop: '1px solid rgba(255,255,255,0.05)',
-        }}>
-          <p className="text-mono" style={{
-            fontSize: '0.7rem',
-            color: 'var(--mountain-blue)',
-            letterSpacing: '0.1em',
-          }}>
-            © {new Date().getFullYear()} {personalInfo.fullName} · Built with passion
-          </p>
-        </footer>
-      </div>
+      {/* Ambient Radial Grid Overlay */}
+      <div className="bg-grid" aria-hidden="true" />
+
+      {/* Frosted Glass Sticky Navbar */}
+      <Navbar />
+
+      {/* Narrative Section Storyline */}
+      <main style={{ position: 'relative', zIndex: 1, paddingTop: 'var(--nav-height)' }}>
+        <Hero />
+        <About />
+        <Skills />
+        <Experience />
+        <HowIBuild />
+        <Projects />
+        <Certifications />
+        <Terminal />
+        <Contact />
+      </main>
+
+      {/* Modern Footer */}
+      <Footer />
     </div>
+  );
+}
+
+function App() {
+  return (
+    <ThemeProvider>
+      <PortfolioProvider>
+        <PortfolioApp />
+      </PortfolioProvider>
+    </ThemeProvider>
   );
 }
 
