@@ -52,7 +52,7 @@ const ProjectModal = ({ project, onClose }) => {
       role="dialog"
       aria-modal="true"
       aria-label={`${project.title} case study`}
-      style={{ zIndex: 10005, padding: 'clamp(1rem, 4vw, 2.5rem)' }}
+      style={{ zIndex: 10005, padding: 'clamp(0.5rem, 3vw, 2rem)' }}
     >
       <div
         className="modal-content"
@@ -61,7 +61,7 @@ const ProjectModal = ({ project, onClose }) => {
           maxWidth: '840px',
           maxHeight: '90vh',
           overflowY: 'auto',
-          padding: 'clamp(1.5rem, 4vw, 2.5rem)',
+          padding: 'clamp(1.2rem, 4vw, 2.5rem)',
           border: '1px solid var(--border-accent)',
           boxShadow: '0 25px 60px rgba(0, 0, 0, 0.7), 0 0 35px var(--accent-glow)',
         }}
@@ -333,7 +333,7 @@ const Projects = () => {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))',
             gap: 'var(--space-xl)',
             maxWidth: '1100px',
             margin: '0 auto',

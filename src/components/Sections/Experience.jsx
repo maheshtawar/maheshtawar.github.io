@@ -41,16 +41,16 @@ const TimelineItem = ({ exp, index, isLast, selectedTech }) => {
   return (
     <div
       ref={itemRef}
-      className={`reveal ${isHighlighted ? 'highlighted-timeline' : ''}`}
+      className={`timeline-item reveal ${isHighlighted ? 'highlighted-timeline' : ''}`}
       style={{
         display: 'flex',
-        gap: 'clamp(1rem, 3vw, 2.5rem)',
+        gap: 'clamp(0.75rem, 3vw, 2.5rem)',
         position: 'relative',
         paddingBottom: isLast ? 0 : 'var(--space-3xl)',
       }}
     >
       {/* Timeline Node Column with dynamic glow */}
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0, width: '40px' }}>
+      <div className="timeline-node-col" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0, width: '36px' }}>
         <div
           style={{
             width: isHighlighted ? '20px' : '16px',
@@ -199,7 +199,7 @@ const TimelineItem = ({ exp, index, isLast, selectedTech }) => {
             </div>
 
             {showBreakdown && (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px', paddingTop: '4px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 160px), 1fr))', gap: '10px', paddingTop: '4px' }}>
                 <div style={{ fontSize: '0.78rem' }}>
                   <strong style={{ color: 'var(--warning)', display: 'block', marginBottom: '2px' }}>Problem</strong>
                   <span style={{ color: 'var(--text-secondary)', lineHeight: 1.5 }}>{breakdown.problem}</span>

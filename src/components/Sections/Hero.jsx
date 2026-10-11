@@ -145,10 +145,11 @@ const Hero = () => {
       <div className="container" style={{ position: 'relative', zIndex: 1 }}>
         {/* Real-Time System Status HUD Banner */}
         <div
+          className="hero-hud-banner"
           style={{
             display: 'inline-flex',
             alignItems: 'center',
-            gap: '12px',
+            gap: '8px',
             padding: '6px 14px',
             borderRadius: '9999px',
             background: 'var(--bg-card)',
@@ -158,9 +159,10 @@ const Hero = () => {
             WebkitBackdropFilter: 'blur(12px)',
             marginBottom: 'var(--space-lg)',
             flexWrap: 'wrap',
+            maxWidth: '100%',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <div className="hud-item" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <span
               style={{
                 width: '7px',
@@ -169,6 +171,7 @@ const Hero = () => {
                 background: 'var(--success)',
                 boxShadow: '0 0 10px var(--success)',
                 animation: 'pulse 2s infinite',
+                flexShrink: 0,
               }}
             />
             <span className="text-mono" style={{ fontSize: '0.72rem', color: 'var(--text-primary)', fontWeight: 600 }}>
@@ -176,24 +179,24 @@ const Hero = () => {
             </span>
           </div>
 
-          <span style={{ color: 'var(--border)' }}>|</span>
+          <span className="hud-divider" style={{ color: 'var(--border)' }}>|</span>
 
-          <span className="text-mono" style={{ fontSize: '0.68rem', color: 'var(--text-secondary)' }}>
+          <span className="hud-item text-mono" style={{ fontSize: '0.68rem', color: 'var(--text-secondary)' }}>
             ROLE: <strong style={{ color: 'var(--text-primary)' }}>Senior Project Associate I @ MKCL</strong>
           </span>
 
-          <span style={{ color: 'var(--border)' }}>|</span>
+          <span className="hud-divider" style={{ color: 'var(--border)' }}>|</span>
 
-          <span className="text-mono" style={{ fontSize: '0.68rem', color: 'var(--accent-light)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+          <span className="hud-item text-mono" style={{ fontSize: '0.68rem', color: 'var(--accent-light)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
             <span>🛡️</span>
-            <span>SECURE SYSTEM DEV: 50K+ ACCOUNTS</span>
+            <span>SECURE SYSTEMS: 50K+ ACCOUNTS</span>
           </span>
 
-          <span style={{ color: 'var(--border)' }}>|</span>
+          <span className="hud-divider" style={{ color: 'var(--border)' }}>|</span>
 
           <button
             onClick={() => setIsCommandPaletteOpen(true)}
-            className="text-mono"
+            className="hud-item text-mono"
             style={{
               fontSize: '0.68rem',
               color: 'var(--accent)',
@@ -213,16 +216,18 @@ const Hero = () => {
 
         {/* Hero Main Flex Layout */}
         <div
+          className="hero-main-layout"
           style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             gap: 'clamp(2rem, 5vw, 4rem)',
             flexWrap: 'wrap',
+            width: '100%',
           }}
         >
           {/* Left Narrative Column */}
-          <div style={{ flex: '1 1 520px', maxWidth: '680px' }}>
+          <div className="hero-narrative-col" style={{ flex: '1 1 460px', maxWidth: '680px', minWidth: 0, width: '100%' }}>
             {/* Identity Salutation */}
             <p
               className="text-mono"
@@ -350,10 +355,11 @@ const Hero = () => {
 
             {/* Key Verified Performance Metrics */}
             <div
+              className="hero-metrics-grid"
               style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))',
-                gap: 'clamp(1rem, 2vw, 1.8rem)',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 105px), 1fr))',
+                gap: 'clamp(0.75rem, 2vw, 1.8rem)',
                 paddingTop: 'var(--space-md)',
                 borderTop: '1px solid var(--border)',
               }}
@@ -362,7 +368,7 @@ const Hero = () => {
                 <div key={i}>
                   <div
                     style={{
-                      fontSize: 'clamp(1.5rem, 2.5vw, 1.85rem)',
+                      fontSize: 'clamp(1.4rem, 2.5vw, 1.85rem)',
                       fontFamily: 'var(--font-display)',
                       fontWeight: 700,
                       color: 'var(--accent-light)',
@@ -390,8 +396,11 @@ const Hero = () => {
 
           {/* Right Column: 3D Interactive Profile Avatar & Tech Constellation Aura */}
           <div
+            className="hero-avatar-col"
             style={{
               flex: '0 1 340px',
+              maxWidth: '100%',
+              minWidth: 0,
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',

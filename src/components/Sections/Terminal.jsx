@@ -171,10 +171,10 @@ const Terminal = () => {
               <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#ef4444' }} />
               <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#f59e0b' }} />
               <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#22c55e' }} />
-              <span className="text-mono" style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginLeft: '12px' }}>
+              <span className="text-mono terminal-title-text" style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginLeft: '8px' }}>
                 mahesh@workstation: ~ (zsh)
               </span>
-              <span className="text-mono" style={{ fontSize: '0.68rem', color: 'var(--accent)', marginLeft: 'auto' }}>
+              <span className="text-mono terminal-live-badge" style={{ fontSize: '0.68rem', color: 'var(--accent)', marginLeft: 'auto' }}>
                 ● LIVE RUNTIME
               </span>
             </div>
@@ -183,7 +183,7 @@ const Terminal = () => {
             <div
               ref={terminalRef}
               style={{
-                padding: '1.25rem',
+                padding: 'clamp(0.85rem, 2.5vw, 1.25rem)',
                 maxHeight: '380px',
                 minHeight: '260px',
                 overflowY: 'auto',
@@ -199,11 +199,11 @@ const Terminal = () => {
               {history.map((entry, i) => (
                 <div key={i} style={{ marginBottom: '0.4rem' }}>
                   {entry.type === 'input' ? (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                       <span style={{ color: 'var(--success)', fontWeight: 'bold' }}>➜</span>
                       <span style={{ color: 'var(--accent-light)' }}>mahesh@mkcl</span>
-                      <span style={{ color: '#64748b' }}>git:(main)</span>
-                      <span style={{ color: 'var(--text-primary)' }}>{entry.text}</span>
+                      <span className="terminal-branch" style={{ color: '#64748b' }}>git:(main)</span>
+                      <span style={{ color: 'var(--text-primary)', wordBreak: 'break-all' }}>{entry.text}</span>
                     </div>
                   ) : (
                     <pre
@@ -227,7 +227,7 @@ const Terminal = () => {
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
                 <span style={{ color: 'var(--success)', fontWeight: 'bold' }}>➜</span>
                 <span style={{ color: 'var(--accent-light)' }}>mahesh@mkcl</span>
-                <span style={{ color: '#64748b' }}>git:(main)</span>
+                <span className="terminal-branch" style={{ color: '#64748b' }}>git:(main)</span>
                 <input
                   ref={inputRef}
                   type="text"

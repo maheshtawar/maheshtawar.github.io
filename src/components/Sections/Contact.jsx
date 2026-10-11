@@ -77,7 +77,7 @@ const Contact = () => {
           </p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: 'var(--space-2xl)' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: 'var(--space-2xl)' }}>
           {/* Contact Direct Info */}
           <div className="reveal" ref={useReveal()}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-xl)' }}>
@@ -91,13 +91,15 @@ const Contact = () => {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
+                    gap: '8px',
+                    flexWrap: 'wrap',
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
-                    <span style={{ fontSize: '1.3rem' }}>✉</span>
-                    <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)', minWidth: 0, flex: 1 }}>
+                    <span style={{ fontSize: '1.3rem', flexShrink: 0 }}>✉</span>
+                    <div style={{ minWidth: 0 }}>
                       <span className="text-label" style={{ fontSize: '0.62rem', display: 'block' }}>Email</span>
-                      <a href={`mailto:${personalInfo.email}`} style={{ fontSize: '0.88rem', color: 'var(--text-primary)', textDecoration: 'none' }}>
+                      <a href={`mailto:${personalInfo.email}`} style={{ fontSize: '0.85rem', color: 'var(--text-primary)', textDecoration: 'none', wordBreak: 'break-all' }}>
                         {personalInfo.email}
                       </a>
                     </div>

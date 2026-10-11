@@ -207,9 +207,9 @@ const CommandPaletteModal = ({ onClose }) => {
       aria-label="Command Center"
       style={{
         zIndex: 10003,
-        padding: 'clamp(1rem, 5vw, 3rem)',
+        padding: 'clamp(0.5rem, 3vw, 2rem)',
         alignItems: 'flex-start',
-        paddingTop: 'clamp(3rem, 10vh, 6rem)',
+        paddingTop: 'clamp(2rem, 8vh, 5rem)',
       }}
     >
       <div

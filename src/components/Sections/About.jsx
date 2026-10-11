@@ -19,11 +19,11 @@ const About = () => {
 
         {/* Editorial Asymmetric Grid */}
         <div
-          className="reveal"
+          className="reveal about-editorial-grid"
           ref={contentRef}
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))',
             gap: 'var(--space-xl)',
             alignItems: 'start',
           }}
@@ -167,7 +167,7 @@ const About = () => {
               <div
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(2, 1fr)',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 120px), 1fr))',
                   gap: 'var(--space-md)',
                 }}
               >

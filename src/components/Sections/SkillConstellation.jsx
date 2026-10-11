@@ -176,9 +176,10 @@ const SkillConstellation = () => {
       </div>
 
       <div
+        className="constellation-grid"
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))',
           gap: 'var(--space-xl)',
           alignItems: 'center',
         }}
@@ -191,6 +192,7 @@ const SkillConstellation = () => {
             maxWidth: '680px',
             margin: '0 auto',
             userSelect: 'none',
+            overflow: 'hidden',
           }}
         >
           <svg
@@ -199,7 +201,7 @@ const SkillConstellation = () => {
               width: '100%',
               height: 'auto',
               display: 'block',
-              overflow: 'visible',
+              overflow: 'hidden',
             }}
           >
             <defs>

@@ -137,16 +137,28 @@ html {
   scroll-behavior: smooth;
   scrollbar-width: thin;
   scrollbar-color: var(--accent) transparent;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 body {
   font-family: var(--font-body);
   background-color: var(--bg-primary);
   color: var(--text-primary);
+  width: 100%;
+  max-width: 100%;
   overflow-x: hidden;
   line-height: 1.6;
   transition: background-color var(--duration-slow) ease,
               color var(--duration-slow) ease;
+}
+
+#root,
+.portfolio-wrapper {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
 }
 
 a {
@@ -903,38 +915,292 @@ ul, ol {
 }
 
 /* =========================================
-   RESPONSIVE
+   RESPONSIVE DESIGN SYSTEM (ALL DEVICES)
    ========================================= */
-@media (max-width: 768px) {
+
+/* --- Tablet Landscape & Small Laptops (max-width: 1024px) --- */
+@media (max-width: 1024px) {
   :root {
-    --nav-height: 56px;
+    --section-padding: clamp(3.5rem, 7vw, 6rem) clamp(1rem, 3.5vw, 2rem);
   }
 
-  .nav-links {
-    display: none;
+  .container {
+    padding: 0 clamp(1rem, 3vw, 1.5rem);
   }
 
-  .nav-resume-btn {
-    display: none;
-  }
-
-  .nav-toggle {
-    display: flex;
-  }
-
-  .section {
-    padding: clamp(3rem, 8vw, 5rem) clamp(1rem, 4vw, 1.5rem);
-  }
-
-  .modal-content {
-    padding: var(--space-xl);
-    margin: 1rem;
+  .card {
+    padding: clamp(1.25rem, 3vw, 1.75rem);
   }
 }
 
-@media (max-width: 480px) {
+/* --- Tablets & Phablets (max-width: 768px) --- */
+@media (max-width: 768px) {
+  :root {
+    --nav-height: 56px;
+    --section-padding: clamp(3rem, 6vw, 4.5rem) 1rem;
+    --space-xl: 1.5rem;
+    --space-2xl: 2.25rem;
+    --space-3xl: 3rem;
+  }
+
+  .section {
+    padding: var(--section-padding);
+  }
+
+  .container {
+    padding: 0 1rem;
+  }
+
+  /* Navigation adjustments */
+  .nav-links,
+  .nav-resume-btn,
+  .nav-social-link {
+    display: none !important;
+  }
+
+  .nav-toggle {
+    display: flex !important;
+  }
+
+  .nav-actions {
+    gap: 0.35rem;
+  }
+
+  /* Mobile slideout nav */
+  .mobile-nav {
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    overflow-y: auto;
+  }
+
+  .mobile-nav-link {
+    font-size: 1.3rem;
+    padding: 0.65rem 1.5rem;
+  }
+
+  /* Hero section adjustments */
+  .hero-main-layout {
+    flex-direction: column !important;
+    gap: 2.5rem !important;
+  }
+
+  .hero-narrative-col {
+    flex: 1 1 100% !important;
+    max-width: 100% !important;
+  }
+
+  .hero-avatar-col {
+    flex: 1 1 auto !important;
+    width: 100% !important;
+    margin: 0 auto !important;
+  }
+
+  .hero-hud-banner {
+    max-width: 100%;
+    padding: 6px 12px !important;
+    border-radius: var(--radius-md) !important;
+  }
+
+  .hud-divider {
+    display: none !important;
+  }
+
+  /* Cards and content */
+  .card {
+    padding: 1.25rem !important;
+    border-radius: var(--radius-md) !important;
+  }
+
+  .modal-overlay {
+    padding: 0.75rem !important;
+  }
+
+  .modal-content {
+    padding: 1.25rem !important;
+    margin: 0.5rem auto !important;
+    max-height: 88vh !important;
+    border-radius: var(--radius-lg) !important;
+  }
+
+  /* Timeline adjustments */
+  .timeline-node-col {
+    width: 32px !important;
+  }
+
+  .step-icon-col {
+    width: 34px !important;
+  }
+
+  /* Constellation map */
+  .constellation-grid {
+    gap: 1.5rem !important;
+  }
+}
+
+/* --- Phablets & Large Phones (max-width: 640px) --- */
+@media (max-width: 640px) {
+  .hero-hud-banner {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 6px !important;
+    border-radius: var(--radius-md) !important;
+  }
+
+  .hero-hud-banner .hud-item {
+    font-size: 0.68rem !important;
+  }
+
+  .btn {
+    padding: 0.65rem 1.15rem;
+    font-size: 0.84rem;
+  }
+
   .heading-hero {
-    font-size: clamp(2rem, 10vw, 3rem);
+    font-size: clamp(2.2rem, 8vw, 3rem);
+  }
+
+  .heading-section {
+    font-size: clamp(1.5rem, 5.5vw, 2rem);
+  }
+
+  .section-header {
+    margin-bottom: 2rem !important;
+  }
+}
+
+/* --- Standard Mobile Phones (max-width: 480px) --- */
+@media (max-width: 480px) {
+  html {
+    font-size: 15px;
+  }
+
+  .container {
+    padding: 0 0.85rem !important;
+  }
+
+  .section {
+    padding: clamp(2.5rem, 6vw, 3.5rem) 0.85rem !important;
+  }
+
+  .card {
+    padding: 1rem !important;
+  }
+
+  .heading-hero {
+    font-size: clamp(1.9rem, 8.5vw, 2.45rem) !important;
+    line-height: 1.1 !important;
+  }
+
+  .heading-section {
+    font-size: 1.45rem !important;
+    line-height: 1.2 !important;
+  }
+
+  .text-body {
+    font-size: 0.92rem !important;
+  }
+
+  /* Terminal optimizations */
+  .terminal-branch,
+  .terminal-live-badge {
+    display: none !important;
+  }
+
+  .terminal-title-text {
+    font-size: 0.68rem !important;
+  }
+
+  /* Avatar size on mobile */
+  .avatar-container {
+    width: 220px !important;
+    height: 220px !important;
+    border-radius: 20px !important;
+  }
+
+  .avatar-container img {
+    border-radius: 18px !important;
+  }
+
+  /* Timeline & process steps */
+  .timeline-node-col {
+    width: 26px !important;
+  }
+
+  .step-icon-col {
+    width: 30px !important;
+  }
+
+  .step-icon-col > div {
+    width: 32px !important;
+    height: 32px !important;
+  }
+
+  .btn-icon {
+    width: 36px !important;
+    height: 36px !important;
+  }
+
+  /* Quick action buttons cluster in Hero */
+  .hero-main-layout .btn {
+    flex: 1 1 calc(50% - 0.5rem);
+    text-align: center;
+    justify-content: center;
+  }
+}
+
+/* --- Ultra-Compact Mobile Phones (max-width: 360px) --- */
+@media (max-width: 360px) {
+  html {
+    font-size: 14px;
+  }
+
+  .container {
+    padding: 0 0.65rem !important;
+  }
+
+  .btn {
+    padding: 0.55rem 0.85rem !important;
+    font-size: 0.78rem !important;
+  }
+
+  .avatar-container {
+    width: 190px !important;
+    height: 190px !important;
+  }
+
+  .heading-hero {
+    font-size: 1.75rem !important;
+  }
+
+  .modal-content {
+    padding: 1rem !important;
+    margin: 0.25rem !important;
+  }
+}
+
+/* --- Touch Devices (Disable Desktop-Only Hover Dependencies) --- */
+@media (hover: none) and (pointer: coarse) {
+  * {
+    cursor: auto !important;
+  }
+
+  .card:hover {
+    transform: none !important;
+  }
+
+  .card:active {
+    transform: scale(0.99) !important;
+  }
+
+  /* Expand tap targets for touch accessibility */
+  .nav-link,
+  .mobile-nav-link,
+  .btn,
+  .tag,
+  .theme-toggle,
+  .btn-icon {
+    min-height: 38px;
   }
 }
 

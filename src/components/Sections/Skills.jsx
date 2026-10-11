@@ -179,7 +179,7 @@ const Skills = () => {
         </div>
 
         {/* Skills Grid with Cross-Highlighting */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 'var(--space-xl)', maxWidth: '1000px', margin: '0 auto' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: 'var(--space-xl)', maxWidth: '1000px', margin: '0 auto' }}>
           {filtered.map((category, ci) => (
             <CategoryGroup
               key={category.category}

@@ -84,16 +84,16 @@ const ProcessStep = ({ step, isLast }) => {
   return (
     <div
       ref={stepRef}
-      className="reveal"
+      className="how-i-build-step reveal"
       style={{
         display: 'flex',
-        gap: 'clamp(1rem, 3vw, 2rem)',
+        gap: 'clamp(0.75rem, 3vw, 2rem)',
         position: 'relative',
         paddingBottom: !isLast ? 'var(--space-xl)' : 0,
       }}
     >
       {/* Node Column with high-precision connector */}
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0, width: '40px' }}>
+      <div className="step-icon-col" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0, width: '36px' }}>
         <div
           style={{
             width: '40px',

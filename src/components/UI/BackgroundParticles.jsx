@@ -62,8 +62,8 @@ const BackgroundParticles = () => {
     let animationId;
     let particles = [];
     const mouse = { x: null, y: null };
-    const maxDistance = 120;
-    const particleCount = 50;
+    const maxDistance = window.innerWidth < 768 ? 80 : 120;
+    const particleCount = window.innerWidth < 480 ? 15 : window.innerWidth < 768 ? 25 : 50;
 
     const resize = () => {
       canvas.width = window.innerWidth;
